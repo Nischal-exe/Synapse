@@ -5,6 +5,8 @@ CREATE TABLE users (
     username VARCHAR UNIQUE NOT NULL,
     email VARCHAR UNIQUE NOT NULL,
     full_name VARCHAR,
-    date_of_birth DATE,
-    hashed_password VARCHAR NOT NULL
+    date_of_birth VARCHAR,
+    hashed_password VARCHAR NOT NULL,
+    is_verified BOOLEAN DEFAULT FALSE,
+    refresh_token VARCHAR
 );
