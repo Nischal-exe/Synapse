@@ -9,3 +9,5 @@ python-multipart
 python-dotenv
 psycopg2-binary
 email-validator
+redis
+fastapi-mail
