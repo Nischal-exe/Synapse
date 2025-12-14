@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Search, MessageSquare, ThumbsUp, Share2, MoreHorizontal } from 'lucide-react';
+import { LogOut, Search, MessageSquare, ThumbsUp, Share2, MoreHorizontal, Plus } from 'lucide-react';
 import logo from '../assets/logo.png';
+import { getRooms, joinRoom } from '../services/api';
 
-const TOPICS = [
-    "10th Exams", "12th Exams", "JEE Mains", "JEE Advance", "CAT", "GATE", "NIMCET"
-];
+interface Room {
+    id: number;
+    name: string;
+    description: string;
+}
 
 const MOCK_POSTS = [
     {
@@ -49,10 +52,37 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [rooms, setRooms] = useState<Room[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRooms = async () => {
+            try {
+                const data = await getRooms();
+                setRooms(data);
+            } catch (error) {
+                console.error("Failed to fetch rooms:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRooms();
+    }, []);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    const handleJoin = async (e: React.MouseEvent, roomId: number) => {
+        e.stopPropagation();
+        try {
+            await joinRoom(roomId);
+            alert("Joined room successfully!");
+        } catch (error) {
+            console.error("Failed to join room:", error);
+            alert("Failed to join room.");
+        }
     };
 
     const filteredPosts = selectedTopic
@@ -111,18 +141,30 @@ export default function Dashboard() {
                         >
                             All Topics
                         </button>
-                        {TOPICS.map((topic) => (
-                            <button
-                                key={topic}
-                                onClick={() => setSelectedTopic(topic)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedTopic === topic
-                                    ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]'
-                                    : 'bg-gray-900 text-gray-400 hover:bg-gray-800 border border-gray-800 hover:border-gray-700'
-                                    }`}
-                            >
-                                {topic}
-                            </button>
-                        ))}
+                        {loading ? (
+                            <span className="text-gray-500">Loading rooms...</span>
+                        ) : (
+                            rooms.map((room) => (
+                                <div key={room.id} className="relative group">
+                                    <button
+                                        onClick={() => setSelectedTopic(room.name)}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all pr-8 ${selectedTopic === room.name
+                                            ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]'
+                                            : 'bg-gray-900 text-gray-400 hover:bg-gray-800 border border-gray-800 hover:border-gray-700'
+                                            }`}
+                                    >
+                                        {room.name}
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleJoin(e, room.id)}
+                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+                                        title="Join Room"
+                                    >
+                                        <Plus className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
