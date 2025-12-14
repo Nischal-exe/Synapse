@@ -27,3 +27,16 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class RoomBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class RoomCreate(RoomBase):
+    pass
+
+class Room(RoomBase):
+    id: int
+
+    class Config:
+        from_attributes = True

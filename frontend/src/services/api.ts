@@ -21,4 +21,15 @@ api.interceptors.request.use(
     }
 );
 
+// Room APIs
+export const getRooms = async () => {
+    const response = await api.get('/rooms/');
+    return response.data;
+};
+
+export const joinRoom = async (roomId: number) => {
+    const response = await api.post(`/rooms/${roomId}/join`);
+    return response.data;
+};
+
 export default api;
