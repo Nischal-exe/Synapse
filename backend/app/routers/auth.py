@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 @router.post("/signup", response_model=schemas.User)
-async def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+async def signup(user: schemas.UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
     db_user = crud.get_user(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
@@ -35,7 +35,7 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db
             otp = utils.generate_otp()
             print(f"DEBUG OTP for {user.email}: {otp}")
             redis_client.setex(f"otp:{user.email}", 300, otp)
-            await email_utils.send_otp_email(user.email, otp)
+            background_tasks.add_task(email_utils.send_otp_email, user.email, otp)
             return db_email
 
     # New User
@@ -45,7 +45,7 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db
     otp = utils.generate_otp()
     print(f"DEBUG OTP for {user.email}: {otp}")
     redis_client.setex(f"otp:{user.email}", 300, otp)
-    await email_utils.send_otp_email(user.email, otp)
+    background_tasks.add_task(email_utils.send_otp_email, user.email, otp)
     return new_user
 
 @router.post("/verify")  # removed response_model=schemas.Token to allow dict
@@ -97,7 +97,7 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(database.ge
     }
 
 @router.post("/forgot-password")
-async def forgot_password(request: schemas.PasswordResetRequest, db: Session = Depends(database.get_db)):
+async def forgot_password(request: schemas.PasswordResetRequest, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
     user = crud.get_user_by_email(db, email=request.email)
     if not user:
         # We return 200 even if user not found to prevent email enumeration, 
@@ -111,7 +111,7 @@ async def forgot_password(request: schemas.PasswordResetRequest, db: Session = D
     
     # We can reuse the OTP email function or create a new one. 
     # For now, reusing the existing one is fine as the message is generic "Verification Code".
-    await email_utils.send_otp_email(request.email, otp)
+    background_tasks.add_task(email_utils.send_otp_email, request.email, otp)
     
     return {"message": "Password reset OTP sent to email"}
 

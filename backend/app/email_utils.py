@@ -1,45 +1,45 @@
 import os
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
-from pydantic import EmailStr
+import resend
 from dotenv import load_dotenv
 
 load_dotenv()
 
-conf = ConnectionConfig(
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "user@example.com"),
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "password"),
-    MAIL_FROM = os.getenv("MAIL_FROM", "user@example.com"),
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587)),
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com"),
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
-    USE_CREDENTIALS = True,
-    VALIDATE_CERTS = True
-)
+resend.api_key = os.getenv("RESEND_API_KEY")
 
-async def send_otp_email(email: EmailStr, otp: str):
+async def send_otp_email(email: str, otp: str):
     html = f"""
-    <html>
-        <body>
-            <h1>Synapse Verification</h1>
-            <p>Your OTP code is: <strong>{otp}</strong></p>
-            <p>This code expires in 5 minutes.</p>
-        </body>
-    </html>
+    <div style="font-family: sans-serif; max-width: 400px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #6D28D9; text-align: center;">Synapse Verification</h2>
+        <p>Hello,</p>
+        <p>Your verification code for Synapse is:</p>
+        <div style="background: #f3f4f6; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111;">{otp}</span>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">This code will expire in 5 minutes. If you did not request this, please ignore this email.</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="text-align: center; font-size: 12px; color: #9ca3af;">&copy; 2025 Synapse Collaborative Learning</p>
+    </div>
     """
     
-    message = MessageSchema(
-        subject="Your Synapse Verification Code",
-        recipients=[email],
-        body=html,
-        subtype=MessageType.html
-    )
-    
-    fm = FastMail(conf)
+    if not resend.api_key:
+        print(f"CRITICAL: RESEND_API_KEY not found. Logging OTP instead.")
+        _log_otp_fallback(email, otp)
+        return
+
     try:
-        await fm.send_message(message)
+        resend.Emails.send({
+            "from": "Synapse <onboarding@resend.dev>",
+            "to": [email],
+            "subject": f"{otp} is your Synapse verification code",
+            "html": html
+        })
+        print(f"Email sent successfully to {email}")
     except Exception as e:
-        print(f"Failed to send email: {e}")
-        print(f"==========================================")
-        print(f"OTP for {email}: {otp}")
-        print(f"==========================================")
+        print(f"Resend API Error: {e}")
+        _log_otp_fallback(email, otp)
+
+def _log_otp_fallback(email: str, otp: str):
+    print(f"\n==========================================")
+    print(f"VERIFICATION CODE FOR: {email}")
+    print(f"CODE: {otp}")
+    print(f"==========================================\n")
