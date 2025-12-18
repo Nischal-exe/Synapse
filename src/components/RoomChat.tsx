@@ -88,19 +88,13 @@ export default function RoomChat({ roomId }: RoomChatProps) {
             const response = await api.get(`/rooms/${roomId}/messages`);
             setMessages(response.data);
 
-            // Start local 30s timer as feedback (though backend enforces it too)
-            // But if we hit 429, we'll use the backend's ttl if parsing allows, 
-            // or just default to 30.
-            // Let's just rely on error catching for 429 to be robust.
-            // Actually, for better UX, let's start a timer on success too so user knows.
-            setRateLimitTimer(30);
+            // Start local 1s timer as feedback (though backend enforces it too)
+            setRateLimitTimer(1);
 
         } catch (err: any) {
             if (err.response && err.response.status === 429) {
-                // Try to parse "Please wait X seconds"
-                // Or just set to 30
                 setError(err.response.data.detail || "Rate limit exceeded");
-                setRateLimitTimer(30);
+                setRateLimitTimer(1);
             } else {
                 setError("Failed to send message");
             }
@@ -142,8 +136,8 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                             </div>
                             <div
                                 className={`px-4 py-2 rounded-2xl max-w-[85%] break-words text-sm shadow-sm ${msg.user_id === user?.id
-                                        ? 'bg-primary text-primary-foreground rounded-tr-none'
-                                        : 'bg-muted text-foreground rounded-tl-none'
+                                    ? 'bg-primary text-primary-foreground rounded-tr-none'
+                                    : 'bg-muted text-foreground rounded-tl-none'
                                     }`}
                             >
                                 {msg.content}
@@ -155,12 +149,14 @@ export default function RoomChat({ roomId }: RoomChatProps) {
             </div>
 
             {/* Rate Limit / Error Warning */}
-            {error && !rateLimitTimer && (
-                <div className="px-4 py-2 bg-destructive/10 text-destructive text-xs font-semibold flex items-center">
-                    <AlertCircle className="w-3 h-3 mr-1" />
-                    {error}
-                </div>
-            )}
+            {
+                error && !rateLimitTimer && (
+                    <div className="px-4 py-2 bg-destructive/10 text-destructive text-xs font-semibold flex items-center">
+                        <AlertCircle className="w-3 h-3 mr-1" />
+                        {error}
+                    </div>
+                )
+            }
 
             {/* Input Area */}
             <div className="p-4 bg-card/50 border-t border-border mt-auto">
@@ -177,8 +173,8 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                         type="submit"
                         disabled={!newMessage.trim() || rateLimitTimer !== null || loading}
                         className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors ${!newMessage.trim() || rateLimitTimer !== null
-                                ? 'text-muted-foreground/50 cursor-not-allowed'
-                                : 'text-primary hover:bg-primary/10'
+                            ? 'text-muted-foreground/50 cursor-not-allowed'
+                            : 'text-primary hover:bg-primary/10'
                             }`}
                     >
                         {rateLimitTimer ? (
