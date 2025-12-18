@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import LoadingDots from '../components/LoadingDots';
 
 export default function VerifyEmail() {
@@ -30,7 +30,7 @@ export default function VerifyEmail() {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:8000/auth/verify', {
+            await api.post('/auth/verify', {
                 email,
                 otp
             });
