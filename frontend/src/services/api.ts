@@ -1,20 +1,9 @@
 import axios from 'axios';
 
-const isLocalhost = typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
 const envUrl = import.meta.env.VITE_API_BASE_URL;
-
-console.log('--- Synapse Debug ---');
-console.log('Hostname:', typeof window !== 'undefined' ? window.location.hostname : 'N/A');
-console.log('Environment Raw VITE_API_BASE_URL:', envUrl);
-
 const apiBaseUrl = (envUrl && envUrl !== 'undefined' && envUrl !== '')
     ? envUrl
-    : (isLocalhost ? 'http://localhost:8000' : 'https://synapse-backend-elo0.onrender.com');
-
-console.log('Final Selected API URL:', apiBaseUrl);
-console.log('---------------------');
+    : 'https://synapse-backend-elo0.onrender.com';
 
 const api = axios.create({
     baseURL: apiBaseUrl,
