@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+
 import { useNavigate } from 'react-router-dom';
-import { LogOut, PlusCircle, CheckCircle, Menu, ArrowRight } from 'lucide-react';
+import { PlusCircle, CheckCircle, ArrowRight } from 'lucide-react';
 import LoadingDots from '../components/LoadingDots';
-import logo from '../assets/logo.png';
 import { getRooms, joinRoom, getSidebarData } from '../services/api';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../components/Sidebar.tsx';
+import Header from '../components/Header';
 
 interface Room {
     id: number;
@@ -15,7 +15,7 @@ interface Room {
 }
 
 export default function Dashboard() {
-    const { logout } = useAuth();
+    // const { logout } = useAuth(); // Not used here anymore, handled by Header
     const navigate = useNavigate();
     const [rooms, setRooms] = useState<Room[]>([]);
     const [loading, setLoading] = useState(true);
@@ -46,10 +46,7 @@ export default function Dashboard() {
         fetchRooms();
     }, []);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+
 
     const handleRoomClick = (roomId: number) => {
         navigate(`/room/${roomId}`);
@@ -60,6 +57,9 @@ export default function Dashboard() {
         try {
             const res = await joinRoom(roomId);
             setRooms(rooms.map(r => r.id === roomId ? { ...r, is_joined: res.joined } : r));
+            if (res.joined) {
+                navigate(`/room/${roomId}`);
+            }
             setSidebarKey(prev => prev + 1); // Refresh sidebar
         } catch (error) {
             console.error("Failed to join room:", error);
@@ -67,39 +67,15 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans selection:bg-gray-800 selection:text-white">
-            {/* Navigation Bar */}
-            <nav className="border-b border-gray-900 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center space-x-3">
-                            <button
-                                onClick={() => setIsSidebarOpen(true)}
-                                className="lg:hidden p-2 text-zinc-400 hover:text-white transition-colors"
-                            >
-                                <Menu className="w-6 h-6" />
-                            </button>
-                            <img src={logo} alt="Synapse" className="h-8 md:h-10 w-auto object-contain brightness-0 invert" />
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={handleLogout}
-                                className="text-gray-400 hover:text-white transition-colors text-sm font-medium flex items-center"
-                            >
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Logout
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div className="min-h-screen bg-background text-foreground font-sans selection:bg-muted selection:text-white transition-colors duration-300">
+            <Header onMenuClick={() => setIsSidebarOpen(true)} />
 
             {/* Main Layout */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col lg:flex-row gap-8">
                 {/* Overlay for mobile sidebar */}
                 {isSidebarOpen && (
                     <div
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+                        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
                         onClick={() => setIsSidebarOpen(false)}
                     />
                 )}
@@ -114,7 +90,7 @@ export default function Dashboard() {
                 {/* Main Content */}
                 <main className="flex-1 min-w-0">
                     <div className="mb-12">
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                             Select a Community
                         </h1>
                     </div>
@@ -127,37 +103,37 @@ export default function Dashboard() {
                             </div>
                         ) : (
                             rooms.length === 0 ? (
-                                <div className="col-span-full text-center py-20 bg-gray-900/10 rounded-3xl border border-dashed border-gray-800">
-                                    <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-800">
-                                        <PlusCircle className="w-8 h-8 text-gray-600" />
+                                <div className="col-span-full text-center py-20 bg-muted/10 rounded-3xl border border-dashed border-border">
+                                    <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border">
+                                        <PlusCircle className="w-8 h-8 text-muted-foreground" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-200 mb-2">No communities available</h3>
-                                    <p className="text-gray-500 max-w-xs mx-auto">Check back later or contact an administrator to create one.</p>
+                                    <h3 className="text-xl font-bold text-foreground mb-2">No communities available</h3>
+                                    <p className="text-muted-foreground max-w-xs mx-auto">Check back later or contact an administrator to create one.</p>
                                 </div>
                             ) : (
                                 rooms.map((room) => (
                                     <div
                                         key={room.id}
                                         onClick={() => handleRoomClick(room.id)}
-                                        className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-6 hover:border-zinc-500 transition-all cursor-pointer group hover:bg-zinc-900/60 flex flex-col justify-between shadow-lg hover:shadow-zinc-900/40 relative overflow-hidden active:scale-[0.98]"
+                                        className="bg-card/40 backdrop-blur-sm border border-border rounded-2xl p-6 hover:border-primary/20 transition-all cursor-pointer group hover:bg-card/60 flex flex-col justify-between shadow-lg hover:shadow-2xl relative overflow-hidden active:scale-[0.98] duration-300"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         <div className="relative z-10">
                                             <div className="flex items-center justify-between mb-3">
-                                                <h3 className="text-xl font-bold text-zinc-100 group-hover:text-white transition-colors">
+                                                <h3 className="text-xl font-bold text-card-foreground group-hover:text-foreground transition-colors">
                                                     {room.name}
                                                 </h3>
                                                 <button
                                                     onClick={(e) => handleJoinRoom(e, room.id)}
-                                                    className={`p-2 rounded-full transition-all ${room.is_joined ? 'text-emerald-400 bg-emerald-400/10' : 'text-zinc-500 hover:text-white hover:bg-zinc-800'}`}
+                                                    className={`p-2 rounded-full transition-all ${room.is_joined ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
                                                 >
                                                     {room.is_joined ? <CheckCircle className="w-5 h-5" /> : <PlusCircle className="w-5 h-5" />}
                                                 </button>
                                             </div>
-                                            <p className="text-zinc-400 text-sm line-clamp-2 mb-4">
+                                            <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
                                                 {room.description || "Join the conversation in " + room.name}
                                             </p>
-                                            <div className="flex items-center text-xs font-semibold text-zinc-500 group-hover:text-zinc-300 transition-colors uppercase tracking-wider">
+                                            <div className="flex items-center text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-wider">
                                                 Enter Room <ArrowRight className="w-3 h-3 ml-1.5 transform group-hover:translate-x-1 transition-transform" />
                                             </div>
                                         </div>
