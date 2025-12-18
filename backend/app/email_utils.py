@@ -1,24 +1,15 @@
 import os
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
-from pydantic import EmailStr
+import resend
+import asyncio
 from dotenv import load_dotenv
 
 load_dotenv()
 
-conf = ConnectionConfig(
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "user@example.com"),
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "password"),
-    MAIL_FROM = os.getenv("MAIL_FROM", "user@example.com"),
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587)),
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com"),
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
-    USE_CREDENTIALS = True,
-    VALIDATE_CERTS = True
-)
+resend.api_key = os.getenv("RESEND_API_KEY")
+FROM_EMAIL = os.getenv("RESEND_FROM", "onboarding@resend.dev")
 
-async def send_otp_email(email: EmailStr, otp: str):
-    html = f"""
+async def send_otp_email(email: str, otp: str):
+    html_content = f"""
     <html>
         <body>
             <h1>Synapse Verification</h1>
@@ -27,19 +18,22 @@ async def send_otp_email(email: EmailStr, otp: str):
         </body>
     </html>
     """
-    
-    message = MessageSchema(
-        subject="Your Synapse Verification Code",
-        recipients=[email],
-        body=html,
-        subtype=MessageType.html
-    )
-    
-    fm = FastMail(conf)
+
+    params = {
+        "from": FROM_EMAIL,
+        "to": [email],
+        "subject": "Your Synapse Verification Code",
+        "html": html_content,
+    }
+
+    loop = asyncio.get_event_loop()
     try:
-        await fm.send_message(message)
+        # resend.Emails.send is synchronous, so we run it in a separate thread
+        # to avoid blocking the FastAPI event loop.
+        await loop.run_in_executor(None, lambda: resend.Emails.send(params))
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email via Resend: {e}")
+        # Fallback: Print OTP to console for dev convenience
         print(f"==========================================")
         print(f"OTP for {email}: {otp}")
         print(f"==========================================")
