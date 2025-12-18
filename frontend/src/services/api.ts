@@ -1,8 +1,23 @@
 import axios from 'axios';
 
-console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
+const isLocalhost = typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const envUrl = import.meta.env.VITE_API_BASE_URL;
+
+console.log('--- Synapse Debug ---');
+console.log('Hostname:', typeof window !== 'undefined' ? window.location.hostname : 'N/A');
+console.log('Environment Raw VITE_API_BASE_URL:', envUrl);
+
+const apiBaseUrl = (envUrl && envUrl !== 'undefined' && envUrl !== '')
+    ? envUrl
+    : (isLocalhost ? 'http://localhost:8000' : 'https://synapse-backend.onrender.com');
+
+console.log('Final Selected API URL:', apiBaseUrl);
+console.log('---------------------');
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+    baseURL: apiBaseUrl,
     headers: {
         'Content-Type': 'application/json',
     },
