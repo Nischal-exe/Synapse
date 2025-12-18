@@ -1,17 +1,27 @@
-import redis
-import os
-from dotenv import load_dotenv
+class MockRedis:
+    def __init__(self):
+        self.store = {}
 
-load_dotenv()
+    def setex(self, name, time, value):
+        # Ignore time for mock, or implement simplified expiry if needed. 
+        # For dev, just storing is fine.
+        self.store[name] = value
+        return True
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
+    def get(self, name):
+        return self.store.get(name)
 
-redis_client = redis.Redis(
-    host=REDIS_HOST, 
-    port=REDIS_PORT, 
-    password=REDIS_PASSWORD, 
-    db=0, 
-    decode_responses=True
-)
+    def delete(self, name):
+        if name in self.store:
+            del self.store[name]
+        return 1
+
+    def exists(self, name):
+        return name in self.store
+
+    def ttl(self, name):
+        # Always return 30 for mock if exists, else -2
+        return 30 if name in self.store else -2
+
+print("WARNING: Using Mock Redis (In-Memory)")
+redis_client = MockRedis()

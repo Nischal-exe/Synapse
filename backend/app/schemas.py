@@ -86,3 +86,31 @@ class Comment(CommentBase):
 
     class Config:
         from_attributes = True
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetVerify(BaseModel):
+    email: EmailStr
+    otp: str
+
+class PasswordResetConfirm(BaseModel):
+    email: EmailStr
+    otp: str
+    new_password: str
+
+class ChatMessageBase(BaseModel):
+    content: str
+    room_id: int
+
+class ChatMessageCreate(ChatMessageBase):
+    pass
+
+class ChatMessage(ChatMessageBase):
+    id: int
+    created_at: datetime
+    user_id: int
+    owner: User
+
+    class Config:
+        from_attributes = True

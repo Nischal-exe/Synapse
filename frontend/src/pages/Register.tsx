@@ -23,7 +23,8 @@ export default function Register() {
                 full_name: fullName,
                 date_of_birth: dob,
             });
-            navigate('/login');
+            // navigate('/login');
+            navigate('/verify', { state: { email } });
         } catch (err: unknown) {
             const errorData = err as { response?: { data?: { detail?: string } } };
             setError(errorData.response?.data?.detail || 'Registration failed');

@@ -20,6 +20,7 @@ class User(Base):
     saved_posts = relationship("SavedPost", back_populates="user")
     liked_posts = relationship("PostLike", back_populates="user")
     joined_rooms = relationship("Room", secondary="room_members", back_populates="members")
+    messages = relationship("ChatMessage", back_populates="owner")
 
 class RoomMember(Base):
     __tablename__ = "room_members"
@@ -37,6 +38,7 @@ class Room(Base):
 
     posts = relationship("Post", back_populates="room")
     members = relationship("User", secondary="room_members", back_populates="joined_rooms")
+    messages = relationship("ChatMessage", back_populates="room")
 
 class Post(Base):
     __tablename__ = "posts"
@@ -88,3 +90,15 @@ class PostLike(Base):
 
     user = relationship("User", back_populates="liked_posts")
     post = relationship("Post", back_populates="likes")
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user_id = Column(Integer, ForeignKey("users.id"))
+    room_id = Column(Integer, ForeignKey("rooms.id"))
+
+    owner = relationship("User", back_populates="messages")
+    room = relationship("Room", back_populates="messages")

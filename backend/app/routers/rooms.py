@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from .. import models, schemas, database
 from .. import auth as auth_utils
+from ..redis_client import redis_client
 
 router = APIRouter(
     prefix="/rooms",
@@ -59,8 +60,59 @@ def join_room(
         db.commit()
         return {"message": f"Left room {room.name}", "joined": False}
     else:
-        # Join
         new_member = models.RoomMember(user_id=current_user.id, room_id=room_id)
         db.add(new_member)
         db.commit()
         return {"message": f"Joined room {room.name}", "joined": True}
+
+@router.get("/{room_id}/messages", response_model=List[schemas.ChatMessage])
+def get_messages(
+    room_id: int,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user)
+):
+    messages = db.query(models.ChatMessage).filter(
+        models.ChatMessage.room_id == room_id
+    ).order_by(models.ChatMessage.created_at.desc()).limit(limit).all()
+    
+    return messages[::-1] # Return in chronological order (oldest first) for chat UI
+
+@router.post("/{room_id}/messages", response_model=schemas.ChatMessage)
+def send_message(
+    room_id: int,
+    message: schemas.ChatMessageCreate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.get_current_user)
+):
+    # 1. Verify membership
+    is_member = db.query(models.RoomMember).filter(
+        models.RoomMember.user_id == current_user.id,
+        models.RoomMember.room_id == room_id
+    ).first()
+    if not is_member:
+        raise HTTPException(status_code=403, detail="Must join room to send messages")
+
+    # 2. Rate Limiting (30 seconds)
+    rate_limit_key = f"chat_rate:{current_user.id}:{room_id}"
+    if redis_client.exists(rate_limit_key):
+        ttl = redis_client.ttl(rate_limit_key)
+        raise HTTPException(
+            status_code=429, 
+            detail=f"Please wait {ttl} seconds before sending another message"
+        )
+
+    # 3. Create Message
+    new_message = models.ChatMessage(
+        content=message.content,
+        room_id=room_id,
+        user_id=current_user.id
+    )
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+
+    # 4. Set Rate Limit
+    redis_client.setex(rate_limit_key, 30, "1") # 30 seconds expiry
+
+    return new_message

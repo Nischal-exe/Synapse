@@ -27,18 +27,23 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db
             db_email.full_name = user.full_name
             db_email.date_of_birth = user.date_of_birth
             db_email.username = user.username
+            # db_email.is_verified = True # Auto-verify removed
             db.commit()
             db.refresh(db_email)
 
             # Resend OTP
             otp = utils.generate_otp()
+            print(f"DEBUG OTP for {user.email}: {otp}")
             redis_client.setex(f"otp:{user.email}", 300, otp)
             await email_utils.send_otp_email(user.email, otp)
             return db_email
 
     # New User
     new_user = crud.create_user(db=db, user=user)
+    # new_user.is_verified = True # Auto-verify removed
+    db.commit()
     otp = utils.generate_otp()
+    print(f"DEBUG OTP for {user.email}: {otp}")
     redis_client.setex(f"otp:{user.email}", 300, otp)
     await email_utils.send_otp_email(user.email, otp)
     return new_user
@@ -90,3 +95,57 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(database.ge
         "refresh_token": refresh_token, 
         "token_type": "bearer"
     }
+
+@router.post("/forgot-password")
+async def forgot_password(request: schemas.PasswordResetRequest, db: Session = Depends(database.get_db)):
+    user = crud.get_user_by_email(db, email=request.email)
+    if not user:
+        # We return 200 even if user not found to prevent email enumeration, 
+        # but for debugging let's be explicit or handle it silently.
+        # For this stage, let's return 404 to help the user debug.
+        raise HTTPException(status_code=404, detail="User with this email does not exist")
+
+    otp = utils.generate_otp()
+    print(f"DEBUG RESET OTP for {request.email}: {otp}")
+    redis_client.setex(f"reset_otp:{request.email}", 300, otp)
+    
+    # We can reuse the OTP email function or create a new one. 
+    # For now, reusing the existing one is fine as the message is generic "Verification Code".
+    await email_utils.send_otp_email(request.email, otp)
+    
+    return {"message": "Password reset OTP sent to email"}
+
+@router.post("/verify-reset-otp")
+def verify_reset_otp(verify_data: schemas.PasswordResetVerify):
+    stored_otp = redis_client.get(f"reset_otp:{verify_data.email}")
+    if not stored_otp or stored_otp != verify_data.otp:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+    
+    return {"message": "OTP verified successfully"}
+
+@router.post("/reset-password")
+def reset_password(confirm_data: schemas.PasswordResetConfirm, db: Session = Depends(database.get_db)):
+    # 1. Verify OTP again to be sure
+    stored_otp = redis_client.get(f"reset_otp:{confirm_data.email}")
+    if not stored_otp or stored_otp != confirm_data.otp:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+    
+    # 2. Check Password Complexity (1 digit, 1 uppercase)
+    import re
+    if not re.search(r"\d", confirm_data.new_password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number")
+    if not re.search(r"[A-Z]", confirm_data.new_password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
+    
+    # 3. Update Password
+    user = crud.get_user_by_email(db, email=confirm_data.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    user.hashed_password = auth.get_password_hash(confirm_data.new_password)
+    db.commit()
+    
+    # 4. Cleanup
+    redis_client.delete(f"reset_otp:{confirm_data.email}")
+    
+    return {"message": "Password has been reset successfully"}
