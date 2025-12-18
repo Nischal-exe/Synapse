@@ -43,11 +43,24 @@ def join_room(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    # Placeholder for joining logic (e.g. creating a UserRoom record)
-    # For now, just verify room exists
-
     room = db.query(models.Room).filter(models.Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     
-    return {"message": f"User {current_user.username} joined room {room.name}"}
+    # Check if already joined
+    is_member = db.query(models.RoomMember).filter(
+        models.RoomMember.user_id == current_user.id,
+        models.RoomMember.room_id == room_id
+    ).first()
+
+    if is_member:
+        # If already a member, toggle off (Leave)
+        db.delete(is_member)
+        db.commit()
+        return {"message": f"Left room {room.name}", "joined": False}
+    else:
+        # Join
+        new_member = models.RoomMember(user_id=current_user.id, room_id=room_id)
+        db.add(new_member)
+        db.commit()
+        return {"message": f"Joined room {room.name}", "joined": True}
