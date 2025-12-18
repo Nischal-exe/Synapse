@@ -1,4 +1,9 @@
 import time
+import os
+import redis
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class MockRedis:
     def __init__(self):
@@ -41,5 +46,17 @@ class MockRedis:
             return True
         return False
 
-print("WARNING: Using Mock Redis (In-Memory)")
-redis_client = MockRedis()
+# Initialize actual Redis if URL is provided
+redis_url = os.getenv("REDIS_URL")
+if redis_url:
+    try:
+        redis_client = redis.from_url(redis_url, decode_responses=True)
+        # Test connection
+        redis_client.ping()
+        print(f"Connected to Redis at {redis_url[:15]}...")
+    except Exception as e:
+        print(f"Failed to connect to Redis: {e}. Falling back to MockRedis.")
+        redis_client = MockRedis()
+else:
+    print("WARNING: REDIS_URL not found. Using MockRedis (In-Memory)")
+    redis_client = MockRedis()
