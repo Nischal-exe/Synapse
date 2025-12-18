@@ -11,7 +11,7 @@ console.log('Environment Raw VITE_API_BASE_URL:', envUrl);
 
 const apiBaseUrl = (envUrl && envUrl !== 'undefined' && envUrl !== '')
     ? envUrl
-    : (isLocalhost ? 'http://localhost:8000' : 'https://synapse-backend.onrender.com');
+    : (isLocalhost ? 'http://localhost:8000' : 'https://synapse-backend-elo0.onrender.com');
 
 console.log('Final Selected API URL:', apiBaseUrl);
 console.log('---------------------');
