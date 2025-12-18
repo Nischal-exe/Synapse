@@ -1,0 +1,59 @@
+﻿On branch glitched
+Your branch is ahead of 'origin/glitched' by 3 commits.
+  (use "git push" to publish your local commits)
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	modified:   backend/.gitignore
+	new file:   backend/README.md
+	modified:   backend/app/auth.py
+	modified:   backend/app/main.py
+	modified:   backend/app/models.py
+	new file:   backend/app/routers/rooms.py
+	modified:   backend/app/schemas.py
+	new file:   frontend/.gitignore
+	new file:   frontend/README.md
+	new file:   frontend/eslint.config.js
+	new file:   frontend/index.html
+	new file:   frontend/package-lock.json
+	new file:   frontend/package.json
+	new file:   frontend/postcss.config.js
+	new file:   frontend/public/vite.svg
+	new file:   frontend/src/App.tsx
+	new file:   frontend/src/assets/logo.jpeg
+	new file:   frontend/src/assets/logo.png
+	new file:   frontend/src/assets/react.svg
+	new file:   frontend/src/index.css
+	new file:   frontend/src/main.tsx
+	new file:   frontend/src/pages/Dashboard.tsx
+	new file:   frontend/src/pages/Home.tsx
+	new file:   frontend/src/pages/Login.tsx
+	new file:   frontend/src/pages/Register.tsx
+	new file:   frontend/src/services/api.ts
+	new file:   frontend/tailwind.config.js
+	new file:   frontend/tsconfig.app.json
+	new file:   frontend/tsconfig.json
+	new file:   frontend/tsconfig.node.json
+	new file:   frontend/vite.config.ts
+	new file:   start_app.bat
+
+Unmerged paths:
+  (use "git add/rm <file>..." as appropriate to mark resolution)
+	deleted by them: backend/migration.sql
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	backend/debug_register.py
+	backend/debug_register_urllib.py
+	backend/migrate_db.py
+	backend_backup/
+	frontend_backup/
+	pull_errors.log
+	pull_output.txt
+	status.log
+	status_conflicts.log
+	status_final.log
+

@@ -1,0 +1,101 @@
+﻿git : From https://
+github.com/Nischal-
+exe/Synapse
+At line:1 char:1
++ git pull origin 
+main 2>&1 | 
+Out-File -Encoding 
+utf8 
+pull_errors.log
++ ~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo 
+             : No  
+  tSpecified: (F   
+ rom https://gi    
+...hal-exe/Syn    
+apse:String) [    
+], RemoteExcep    
+tion
+    + FullyQualifi 
+   edErrorId : Na  
+  tiveCommandErr   
+ or
+ 
+ * branch          
+  main       -> 
+FETCH_HEAD
+error: Your local 
+changes to the 
+following files 
+would be 
+overwritten by 
+merge:
+	
+backend/app/main.py
+	backend/app/models
+.py
+Please commit your 
+changes or stash 
+them before you 
+merge.
+error: The 
+following 
+untracked working 
+tree files would 
+be overwritten by 
+merge:
+	
+frontend/.gitignore
+	frontend/README.md
+	frontend/eslint.co
+nfig.js
+	
+frontend/index.html
+	frontend/package-l
+ock.json
+	frontend/package.j
+son
+	frontend/postcss.c
+onfig.js
+	frontend/public/vi
+te.svg
+	frontend/src/App.t
+sx
+	frontend/src/asset
+s/logo.jpeg
+	frontend/src/asset
+s/logo.png
+	frontend/src/asset
+s/react.svg
+	frontend/src/index
+.css
+	frontend/src/main.
+tsx
+	frontend/src/pages
+/Dashboard.tsx
+	frontend/src/pages
+/Home.tsx
+	frontend/src/pages
+/Login.tsx
+	frontend/src/pages
+/Register.tsx
+	frontend/src/servi
+ces/api.ts
+	frontend/tailwind.
+config.js
+	frontend/tsconfig.
+app.json
+	frontend/tsconfig.
+json
+	frontend/tsconfig.
+node.json
+	frontend/vite.conf
+ig.ts
+Please move or 
+remove them before 
+you merge.
+Aborting
+Merge with 
+strategy ort 
+failed.

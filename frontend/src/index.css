@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: #050505;
+    --color-text: #ffffff;
+    --color-gray: #a1a1aa;
+    --color-border: #27272a;
+    --glass-bg: rgba(24, 24, 27, 0.4);
+    --glass-border: rgba(63, 63, 70, 0.4);
+  }
+
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(39, 39, 42, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 100% 100%, rgba(24, 24, 27, 0.3) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2.5 bg-black text-white font-medium rounded-lg transition-all duration-300 hover:bg-gray-800 hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-white text-black font-medium rounded-lg border-2 border-black transition-all duration-300 hover:bg-black hover:text-white hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+
+  .section-container {
+    @apply max-w-7xl mx-auto px-6 py-20;
+  }
+
+  .card {
+    @apply bg-white border-2 border-black rounded-xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+  }
+
+  .post-card {
+    @apply bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:border-black hover:shadow-xl;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-black via-gray-700 to-black bg-clip-text text-transparent;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-in;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.8s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
