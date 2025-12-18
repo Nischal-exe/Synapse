@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import logo from '../assets/logo.png';
+import { User, Mail, Lock, Calendar, ArrowRight, UserCircle } from 'lucide-react';
 
 export default function Register() {
     const [username, setUsername] = useState('');
@@ -23,7 +24,6 @@ export default function Register() {
                 full_name: fullName,
                 date_of_birth: dob,
             });
-            // navigate('/login');
             navigate('/verify', { state: { email } });
         } catch (err: unknown) {
             const errorData = err as { response?: { data?: { detail?: string } } };
@@ -32,99 +32,133 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8 font-sans">
-            <div className="max-w-md w-full space-y-8 bg-zinc-900/50 p-10 rounded-[32px] border border-zinc-800 backdrop-blur-xl shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-                <div className="relative z-10">
-                    <div className="text-center">
-                        <Link to="/" className="inline-block hover:scale-105 transition-transform">
-                            <img className="mx-auto h-16 w-auto object-contain brightness-0 invert" src={logo} alt="Synapse" />
-                        </Link>
-                        <h2 className="mt-8 text-4xl font-black tracking-tight text-white mb-2">Create Account</h2>
-                        <p className="text-zinc-500 font-medium">Join the Synapse community</p>
-                    </div>
-                    <form className="mt-10 space-y-6" onSubmit={handleSubmit}>
-                        {error && (
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 py-3 rounded-xl text-sm font-medium animate-shake text-center">
-                                {error}
-                            </div>
-                        )}
-                        <div className="space-y-4">
-                            <div className="group">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 ml-1 mb-1.5 block group-focus-within:text-white transition-colors">Full Name</label>
+        <div className="min-h-screen flex items-center justify-center bg-background py-12 px-6 relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-[5%] right-[10%] w-[35%] h-[35%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute bottom-[5%] left-[10%] w-[35%] h-[35%] bg-indigo-500/10 rounded-full blur-[120px] animate-float" />
+            </div>
+
+            <div className="max-w-xl w-full glass-card p-10 relative z-10 animate-fade-in shadow-2xl">
+                <div className="text-center mb-10">
+                    <Link to="/" className="inline-block group transition-transform duration-500 hover:scale-110">
+                        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 mx-auto mb-6">
+                            <img className="h-10 w-10 object-contain brightness-0 invert" src={logo} alt="Synapse" />
+                        </div>
+                    </Link>
+                    <h2 className="text-4xl font-extrabold tracking-tight text-foreground mb-3">Create Your Account</h2>
+                    <p className="text-muted-foreground font-medium">Join thousands of students learning together</p>
+                </div>
+
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                    {error && (
+                        <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm font-semibold p-4 rounded-xl animate-shake">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-muted-foreground ml-1">Full Name</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <User className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                </div>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-5 py-3.5 bg-black/50 border border-zinc-800 rounded-2xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/10 focus:border-zinc-600 transition-all font-medium"
-                                    placeholder="Enter your full name"
+                                    className="block w-full pl-12 pr-4 py-3.5 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium"
+                                    placeholder="John Doe"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="group">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 ml-1 mb-1.5 block group-focus-within:text-white transition-colors">Birthday</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        className="w-full px-5 py-3.5 bg-black/50 border border-zinc-800 rounded-2xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/10 focus:border-zinc-600 transition-all font-medium color-scheme-dark"
-                                        value={dob}
-                                        onChange={(e) => setDob(e.target.value)}
-                                    />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-muted-foreground ml-1">Username</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <UserCircle className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 </div>
-                                <div className="group">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 ml-1 mb-1.5 block group-focus-within:text-white transition-colors">Username</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-5 py-3.5 bg-black/50 border border-zinc-800 rounded-2xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/10 focus:border-zinc-600 transition-all font-medium"
-                                        placeholder="Pick a handle"
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                            <div className="group">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 ml-1 mb-1.5 block group-focus-within:text-white transition-colors">Email Address</label>
                                 <input
-                                    type="email"
+                                    type="text"
                                     required
-                                    className="w-full px-5 py-3.5 bg-black/50 border border-zinc-800 rounded-2xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/10 focus:border-zinc-600 transition-all font-medium"
-                                    placeholder="you@example.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </div>
-                            <div className="group">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 ml-1 mb-1.5 block group-focus-within:text-white transition-colors">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    className="w-full px-5 py-3.5 bg-black/50 border border-zinc-800 rounded-2xl text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/10 focus:border-zinc-600 transition-all font-medium"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="block w-full pl-12 pr-4 py-3.5 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium"
+                                    placeholder="johndoe123"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        <div>
-                            <button
-                                type="submit"
-                                className="w-full flex justify-center py-4 px-6 border border-transparent text-sm font-black rounded-2xl text-black bg-white hover:bg-zinc-200 focus:outline-none transition-all active:scale-95 shadow-xl shadow-white/5 uppercase tracking-wider"
-                            >
-                                Get Started
-                            </button>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-muted-foreground ml-1">Email Address</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Mail className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                </div>
+                                <input
+                                    type="email"
+                                    required
+                                    className="block w-full pl-12 pr-4 py-3.5 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium"
+                                    placeholder="john@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
                         </div>
-                    </form>
-                    <div className="text-center mt-10">
-                        <p className="text-zinc-500 font-medium">
-                            Already have an account?{' '}
-                            <Link to="/login" className="text-white hover:underline decoration-zinc-500 underline-offset-4 focus:outline-none">
-                                Sign in
-                            </Link>
-                        </p>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-muted-foreground ml-1">Birthday</label>
+                            <div className="relative group">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <Calendar className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                </div>
+                                <input
+                                    type="date"
+                                    required
+                                    className="block w-full pl-12 pr-4 py-3.5 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium dark:color-scheme-dark"
+                                    value={dob}
+                                    onChange={(e) => setDob(e.target.value)}
+                                />
+                            </div>
+                        </div>
                     </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-muted-foreground ml-1">Password</label>
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Lock className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            </div>
+                            <input
+                                type="password"
+                                required
+                                className="block w-full pl-12 pr-4 py-3.5 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2 group mt-4"
+                    >
+                        Create Account
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                </form>
+
+                <div className="text-center mt-10">
+                    <p className="text-muted-foreground font-medium">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-primary font-bold hover:underline decoration-2 underline-offset-4">
+                            Sign in
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>

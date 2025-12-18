@@ -93,13 +93,13 @@ def send_message(
     if not is_member:
         raise HTTPException(status_code=403, detail="Must join room to send messages")
 
-    # 2. Rate Limiting (30 seconds)
+    # 2. Rate Limiting (1 second)
     rate_limit_key = f"chat_rate:{current_user.id}:{room_id}"
     if redis_client.exists(rate_limit_key):
         ttl = redis_client.ttl(rate_limit_key)
         raise HTTPException(
             status_code=429, 
-            detail=f"Please wait {ttl} seconds before sending another message"
+            detail=f"Please wait {ttl}s before sending another message"
         )
 
     # 3. Create Message
@@ -113,6 +113,6 @@ def send_message(
     db.refresh(new_message)
 
     # 4. Set Rate Limit
-    redis_client.setex(rate_limit_key, 30, "1") # 30 seconds expiry
+    redis_client.setex(rate_limit_key, 1, "1") # 1 second expiry
 
     return new_message
