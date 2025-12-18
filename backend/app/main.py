@@ -14,13 +14,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-origins = []
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
-    origins.append(frontend_url)
-else:
-    # Fallback for local dev if absolutely needed, or leave empty for strict prod
-    origins.append("http://localhost:5173") 
+    # Handle potentially multiple URLs and strip trailing slashes
+    for url in frontend_url.split(","):
+        clean_url = url.strip().rstrip("/")
+        if clean_url:
+            origins.append(clean_url)
 
 app.add_middleware(
     CORSMiddleware,
