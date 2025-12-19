@@ -60,6 +60,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<div className="min-h-screen flex items-center justify-center text-red-500 font-bold text-2xl">404 - Page Not Found (React)</div>} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
