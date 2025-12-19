@@ -21,6 +21,7 @@ export default function Register() {
                 email,
                 password,
                 options: {
+                    emailRedirectTo: `${window.location.origin}/login`,
                     data: {
                         username,
                         full_name: fullName,
