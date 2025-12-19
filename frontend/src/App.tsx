@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider.tsx';
 import { useAuth } from './hooks/useAuth';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import UpdatePassword from './pages/UpdatePassword';
-import VerifyEmail from './pages/VerifyEmail';
-import Dashboard from './pages/Dashboard';
-import RoomDetails from './pages/RoomDetails';
+import Home from './pages/Home.tsx';
+import Login from './pages/Login.tsx';
+import Register from './pages/Register.tsx';
+import ForgotPassword from './pages/ForgotPassword.tsx';
+import UpdatePassword from './pages/UpdatePassword.tsx';
+import VerifyEmail from './pages/VerifyEmail.tsx';
+import Dashboard from './pages/Dashboard.tsx';
+import RoomDetails from './pages/RoomDetails.tsx';
 import './index.css';
 
 import LoadingDots from './components/LoadingDots';
