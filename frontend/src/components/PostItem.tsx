@@ -64,75 +64,75 @@ export default function PostItem({ post }: { post: Post }) {
     };
 
     return (
-        <div className="bg-white/60 dark:bg-zinc-900/40 backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl p-6 hover:border-zinc-300 dark:hover:border-white/10 hover:bg-white dark:hover:bg-zinc-900/60 transition-all duration-300 group shadow-lg hover:shadow-xl hover:shadow-zinc-200/50 dark:hover:shadow-black/50">
-            <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 mb-3 leading-tight group-hover:text-black dark:group-hover:text-white transition-colors">{post.title}</h3>
-            <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-6 whitespace-pre-wrap leading-relaxed">{post.content}</p>
-            <div className="flex items-center justify-between text-xs font-medium text-zinc-500 border-t border-zinc-100 dark:border-white/5 pt-4 mt-2">
-                <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] text-white font-bold">
+        <div className="glass-card bg-white/20 dark:bg-black/20 border-primary/5 rounded-[2rem] p-8 hover:border-primary/20 transition-all duration-500 group shadow-[0_10px_40px_rgba(0,0,0,0.02)]">
+            <h3 className="text-2xl font-bold text-foreground mb-4 leading-tight">{post.title}</h3>
+            <p className="text-foreground/60 text-sm mb-8 whitespace-pre-wrap leading-loose font-sans">{post.content}</p>
+            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-foreground/30 border-t border-primary/5 pt-6 mt-2 font-sans">
+                <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[10px] text-white">
                             {post.owner?.username?.substring(0, 1).toUpperCase() || 'U'}
                         </div>
-                        <span className="text-zinc-500 dark:text-zinc-400">{post.owner?.username || 'User'}</span>
+                        <span className="text-foreground/40">{post.owner?.username || 'User'}</span>
                     </div>
-                    <span>•</span>
+                    <span className="opacity-30">•</span>
                     <span>{new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                 </div>
                 <div className="flex items-center space-x-4">
                     <button
                         onClick={handleLike}
-                        className={`flex items-center space-x-1.5 transition-all duration-200 px-3 py-1.5 rounded-full ${isLiked ? 'text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10' : 'hover:text-zinc-800 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5'}`}
+                        className={`flex items-center space-x-2 transition-all duration-300 px-4 py-2 rounded-full border ${isLiked ? 'text-primary border-primary bg-primary/5' : 'text-foreground/30 border-primary/5 hover:border-primary/20 hover:text-primary hover:bg-primary/5'}`}
                     >
-                        <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+                        <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
                         <span>{likesCount}</span>
                     </button>
                     <button
                         onClick={toggleComments}
-                        className="flex items-center space-x-1.5 hover:text-zinc-800 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/5 px-3 py-1.5 rounded-full transition-all duration-200"
+                        className="flex items-center space-x-2 transition-all duration-300 px-4 py-2 rounded-full border border-primary/5 text-foreground/30 hover:border-primary/20 hover:text-primary hover:bg-primary/5"
                     >
-                        <MessageSquare className="w-4 h-4" />
-                        <span>{comments.length > 0 ? comments.length : ''} Comment{comments.length !== 1 ? 's' : ''}</span>
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>{comments.length > 0 ? comments.length : ''} Voice{comments.length !== 1 ? 's' : ''}</span>
                     </button>
                 </div>
             </div>
 
             {showComments && (
-                <div className="mt-6 pt-6 border-t border-zinc-100 dark:border-white/5 space-y-5 animate-slide-up">
+                <div className="mt-8 pt-8 border-t border-primary/5 space-y-6 animate-slide-up">
                     {comments.length > 0 && (
-                        <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                        <div className="space-y-6 max-h-96 overflow-y-auto custom-scrollbar pr-4">
                             {comments.map(comment => (
-                                <div key={comment.id} className="flex space-x-3">
-                                    <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                                <div key={comment.id} className="flex space-x-4">
+                                    <div className="w-8 h-8 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center flex-shrink-0 text-[10px] font-black text-primary/40">
                                         {comment.owner?.username?.substring(0, 1).toUpperCase()}
                                     </div>
-                                    <div className="flex-1 bg-zinc-50 dark:bg-white/5 rounded-2xl rounded-tl-none p-3 border border-zinc-100 dark:border-white/5">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="font-semibold text-zinc-700 dark:text-zinc-300 text-xs">{comment.owner?.username}</span>
-                                            <span className="text-[10px] text-zinc-500 dark:text-zinc-600">{new Date(comment.created_at).toLocaleDateString()}</span>
+                                    <div className="flex-1 bg-primary/5 rounded-[1.5rem] rounded-tl-none p-4 border border-primary/5">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="font-bold text-foreground/60 text-[10px] uppercase tracking-widest font-sans">{comment.owner?.username}</span>
+                                            <span className="text-[10px] text-foreground/20 font-sans">{new Date(comment.created_at).toLocaleDateString()}</span>
                                         </div>
-                                        <p className="text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">{comment.content}</p>
+                                        <p className="text-foreground/70 text-sm leading-relaxed font-sans">{comment.content}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     )}
 
-                    <form onSubmit={handleAddComment} className="flex gap-3 items-center sticky bottom-0 bg-transparent pt-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-700 dark:to-zinc-900 flex items-center justify-center flex-shrink-0 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                            Me
+                    <form onSubmit={handleAddComment} className="flex gap-4 items-center sticky bottom-0 bg-transparent pt-4">
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 text-[10px] font-black text-white">
+                            S
                         </div>
                         <div className="flex-1 relative group">
                             <input
                                 type="text"
-                                placeholder="Write a comment..."
-                                className="w-full bg-zinc-50 dark:bg-black/40 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400/50 dark:focus:ring-zinc-500/50 transition-all placeholder-zinc-500 dark:placeholder-zinc-600"
+                                placeholder="Add your voice to the discussion..."
+                                className="w-full bg-primary/5 border border-primary/5 rounded-full px-6 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder-foreground/20 font-sans"
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 required
                             />
                             <button
                                 type="submit"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black dark:bg-white text-white dark:text-black p-1.5 rounded-lg hover:bg-zinc-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-white p-2 rounded-full hover:scale-105 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                                 disabled={!newComment.trim()}
                             >
                                 <Send className="w-3.5 h-3.5" />

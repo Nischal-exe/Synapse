@@ -83,7 +83,7 @@ export default function RoomDetails() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center transition-colors duration-300">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <LoadingDots />
             </div>
         );
@@ -91,73 +91,72 @@ export default function RoomDetails() {
 
     if (!room) {
         return (
-            <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-white flex flex-col items-center justify-center transition-colors duration-300">
-                <h2 className="text-2xl font-bold mb-4">Room not found</h2>
-                <button onClick={() => navigate('/dashboard')} className="text-blue-500 hover:underline">
-                    Back to Dashboard
+            <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center">
+                <h2 className="text-4xl font-semibold mb-6 italic">Collective not found</h2>
+                <button onClick={() => navigate('/dashboard')} className="text-primary font-bold uppercase tracking-widest text-[10px] font-sans hover:underline underline-offset-8">
+                    Return to Hub
                 </button>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans flex flex-col h-screen transition-colors duration-300">
+        <div className="min-h-screen bg-background text-foreground font-sans flex flex-col h-screen overflow-hidden">
             <Header onMenuClick={() => setIsSidebarOpen(true)} />
 
-            <div className="flex flex-1 overflow-hidden relative">
+            <div className="flex flex-1 overflow-hidden relative pt-20">
                 {/* Mobile sidebar overlay */}
                 {isSidebarOpen && (
-                    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
+                    <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
                 )}
 
                 <Sidebar key={isSidebarOpen ? 'open' : 'closed'} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
                 <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                     {/* Background acccent */}
-                    <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-muted/50 to-transparent pointer-events-none" />
+                    <div className="absolute top-0 left-0 w-full h-96 bg-primary/5 pointer-events-none" />
 
                     {/* Room Toolbar */}
-                    <div className="border-b border-border bg-background/60 p-4 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl transition-colors duration-300">
-                        <div className="flex items-center space-x-4">
-                            <button onClick={() => navigate('/dashboard')} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors">
+                    <div className="border-b border-primary/5 bg-background/80 p-6 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl shrink-0">
+                        <div className="flex items-center space-x-6">
+                            <button onClick={() => navigate('/dashboard')} className="p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all">
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <div>
-                                <h1 className="text-xl font-bold text-foreground tracking-tight">{room.name}</h1>
-                                <p className="text-xs text-muted-foreground line-clamp-1 font-medium">{room.description}</p>
+                                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">{room.name}</h1>
+                                <p className="text-[9px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[150px] sm:max-w-none">{room.description}</p>
                             </div>
                         </div>
                         {/* Mobile Chat Toggle */}
                         <button
-                            className="lg:hidden p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors relative"
+                            className="lg:hidden p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all relative"
                             onClick={() => setIsChatOpen(!isChatOpen)}
                         >
                             <MessageSquare className="w-5 h-5" />
-                            {/* Optional: Add notification dot here if needed */}
                         </button>
                     </div>
 
                     <div className="flex-1 flex overflow-hidden">
                         {/* Posts Content */}
-                        <div className={`flex-1 overflow-y-auto p-4 md:p-8 space-y-6 relative z-10 custom-scrollbar ${isChatOpen ? 'hidden lg:block' : 'block'}`}>
+                        <div className={`flex-1 overflow-y-auto p-4 sm:p-6 md:p-12 space-y-10 relative z-10 custom-scrollbar ${isChatOpen ? 'hidden lg:block' : 'block'}`}>
                             {/* Create Post Form */}
-                            <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl p-6 mb-8 transition-all hover:border-input shadow-lg">
-                                <h3 className="text-lg font-bold text-foreground mb-4 flex items-center">
-                                    <span className="w-2 h-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-                                    Ask a Question
+                            <div className="glass-card bg-white/40 dark:bg-black/40 border-primary/10 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:border-primary/30 transition-all">
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-8 flex items-center">
+                                    <span className="w-2 h-2 rounded-full bg-primary mr-4 animate-pulse"></span>
+                                    Initiate Discussion
                                 </h3>
-                                <form onSubmit={handleCreatePost} className="space-y-4">
+                                <form onSubmit={handleCreatePost} className="space-y-6">
                                     <input
                                         type="text"
-                                        placeholder="What's your question about?"
-                                        className="w-full bg-background/50 border border-input rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all placeholder-muted-foreground font-medium"
+                                        placeholder="Headline for your question..."
+                                        className="w-full bg-primary/5 border border-primary/5 rounded-full px-6 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans text-sm"
                                         value={newPostTitle}
                                         onChange={(e) => setNewPostTitle(e.target.value)}
                                         required
                                     />
                                     <textarea
-                                        placeholder="Describe your question in detail..."
-                                        className="w-full bg-background/50 border border-input rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all h-32 resize-none placeholder-muted-foreground"
+                                        placeholder="Detail your inquiry for the collective..."
+                                        className="w-full bg-primary/5 border border-primary/5 rounded-[2rem] px-6 py-5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all h-32 resize-none font-sans text-sm"
                                         value={newPostContent}
                                         onChange={(e) => setNewPostContent(e.target.value)}
                                         required
@@ -165,30 +164,35 @@ export default function RoomDetails() {
                                     <div className="flex justify-end">
                                         <button
                                             type="submit"
-                                            className="bg-primary text-primary-foreground font-bold py-2.5 px-6 rounded-xl hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/20"
+                                            className="btn-primary py-3 px-8 text-[10px] uppercase tracking-[0.2em]"
                                         >
-                                            Post Question
+                                            Submit to Collective
                                         </button>
                                     </div>
                                 </form>
                             </div>
 
                             {posts.length === 0 ? (
-                                <div className="text-center py-20">
-                                    <p className="text-muted-foreground">No posts in this room yet.</p>
+                                <div className="text-center py-24">
+                                    <div className="w-16 h-16 bg-primary/5 border border-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <MessageSquare className="w-6 h-6 text-primary/30" />
+                                    </div>
+                                    <p className="text-foreground/30 text-[10px] uppercase tracking-widest font-black font-sans">No voices heard in this collective yet.</p>
                                 </div>
                             ) : (
-                                posts.map((post) => (
-                                    <PostItem key={post.id} post={post} />
-                                ))
+                                <div className="space-y-8 pb-12">
+                                    {posts.map((post) => (
+                                        <PostItem key={post.id} post={post} />
+                                    ))}
+                                </div>
                             )}
                         </div>
 
                         {/* Chat Sidebar (Desktop: Always visible, Mobile: Toggled) */}
                         <div className={`
-                            lg:w-96 border-l border-border bg-background/50 backdrop-blur-sm lg:block
+                            lg:w-[26rem] border-l border-primary/5 bg-primary/[0.02] backdrop-blur-md lg:block
                             ${isChatOpen ? 'block w-full absolute inset-0 z-20 bg-background' : 'hidden'}
-                            lg:relative lg:inset-auto lg:bg-transparent lg:z-auto
+                            lg:relative lg:inset-auto lg:z-auto
                         `}>
                             {roomId && <RoomChat roomId={Number(roomId)} />}
                         </div>
