@@ -67,8 +67,8 @@ export default function PostItem({ post }: { post: Post }) {
         <div className="glass-card bg-white/20 dark:bg-black/20 border-primary/5 rounded-[2rem] p-8 hover:border-primary/20 transition-all duration-500 group shadow-[0_10px_40px_rgba(0,0,0,0.02)]">
             <h3 className="text-2xl font-bold text-foreground mb-4 leading-tight">{post.title}</h3>
             <p className="text-foreground/60 text-sm mb-8 whitespace-pre-wrap leading-loose font-sans">{post.content}</p>
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-foreground/30 border-t border-primary/5 pt-6 mt-2 font-sans">
-                <div className="flex items-center space-x-6">
+            <div className="flex flex-wrap items-center justify-between gap-6 text-[10px] font-black uppercase tracking-widest text-foreground/30 border-t border-primary/5 pt-6 mt-2 font-sans">
+                <div className="flex items-center space-x-4 sm:space-x-6">
                     <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[10px] text-white">
                             {post.owner?.username?.substring(0, 1).toUpperCase() || 'U'}
@@ -91,7 +91,7 @@ export default function PostItem({ post }: { post: Post }) {
                         className="flex items-center space-x-2 transition-all duration-300 px-4 py-2 rounded-full border border-primary/5 text-foreground/30 hover:border-primary/20 hover:text-primary hover:bg-primary/5"
                     >
                         <MessageSquare className="w-3.5 h-3.5" />
-                        <span>{comments.length > 0 ? comments.length : ''} Voice{comments.length !== 1 ? 's' : ''}</span>
+                        <span>{comments.length > 0 ? comments.length : ''} Comment{comments.length !== 1 ? 's' : ''}</span>
                     </button>
                 </div>
             </div>
@@ -124,7 +124,7 @@ export default function PostItem({ post }: { post: Post }) {
                         <div className="flex-1 relative group">
                             <input
                                 type="text"
-                                placeholder="Add your voice to the discussion..."
+                                placeholder="Add your comment to the discussion..."
                                 className="w-full bg-primary/5 border border-primary/5 rounded-full px-6 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder-foreground/20 font-sans"
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
