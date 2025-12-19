@@ -41,8 +41,6 @@ export default function RoomChat({ roomId }: RoomChatProps) {
         const fetchMessages = async () => {
             try {
                 const response = await api.get(`/rooms/${roomId}/messages`);
-                // Simple optimization: only update if length changes or last ID changes
-                // For now, just setting it is fine, React handles diffing
                 setMessages(response.data);
             } catch (err) {
                 console.error("Failed to fetch messages", err);
@@ -84,19 +82,16 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                 room_id: roomId
             });
             setNewMessage('');
-            // Optimistic update or immediate fetch could happen here
             const response = await api.get(`/rooms/${roomId}/messages`);
             setMessages(response.data);
-
-            // Start local 1s timer as feedback (though backend enforces it too)
             setRateLimitTimer(1);
 
         } catch (err: any) {
             if (err.response && err.response.status === 429) {
-                setError(err.response.data.detail || "Rate limit exceeded");
+                setError(err.response.data.detail || "Frequency limit exceeded");
                 setRateLimitTimer(1);
             } else {
-                setError("Failed to send message");
+                setError("Collective synchronization failed");
             }
         } finally {
             setLoading(false);
@@ -104,21 +99,23 @@ export default function RoomChat({ roomId }: RoomChatProps) {
     };
 
     return (
-        <div className="flex flex-col h-full bg-background border-l border-border">
+        <div className="flex flex-col h-full bg-background/40 backdrop-blur-xl">
             {/* Header */}
-            <div className="p-4 border-b border-border bg-card/50 backdrop-blur-md">
-                <h3 className="font-bold text-foreground flex items-center">
-                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-                    Live Chat
+            <div className="p-6 border-b border-primary/5 bg-primary/[0.03] backdrop-blur-md">
+                <h3 className="text-sm font-bold text-foreground flex items-center">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3 animate-pulse"></span>
+                    Synchronized Feed
                 </h3>
             </div>
 
             {/* Messages List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar pb-10">
                 {messages.length === 0 ? (
-                    <div className="text-center text-muted-foreground text-sm py-10 opacity-70">
-                        <p>No messages yet.</p>
-                        <p>Be the first to say hi!</p>
+                    <div className="text-center py-20 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-primary/5 border border-primary/5 flex items-center justify-center mb-4">
+                            <Send className="w-4 h-4 text-primary/20" />
+                        </div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20 font-sans">Awaiting first link...</p>
                     </div>
                 ) : (
                     messages.map((msg) => (
@@ -126,18 +123,18 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                             key={msg.id}
                             className={`flex flex-col ${msg.user_id === user?.id ? 'items-end' : 'items-start'}`}
                         >
-                            <div className="flex items-baseline space-x-2 mb-1">
-                                <span className={`text-xs font-bold ${msg.user_id === user?.id ? 'text-primary' : 'text-muted-foreground'}`}>
+                            <div className="flex items-baseline space-x-2 mb-2 px-1">
+                                <span className={`text-[10px] font-black uppercase tracking-widest font-sans ${msg.user_id === user?.id ? 'text-primary' : 'text-foreground/40'}`}>
                                     {msg.owner.username}
                                 </span>
-                                <span className="text-[10px] text-muted-foreground/60">
+                                <span className="text-[9px] text-foreground/20 font-sans">
                                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
                             <div
-                                className={`px-4 py-2 rounded-2xl max-w-[85%] break-words text-sm shadow-sm ${msg.user_id === user?.id
-                                    ? 'bg-primary text-primary-foreground rounded-tr-none'
-                                    : 'bg-muted text-foreground rounded-tl-none'
+                                className={`px-4 py-2.5 rounded-[1.2rem] max-w-[90%] break-words text-sm font-sans shadow-sm border ${msg.user_id === user?.id
+                                    ? 'bg-primary text-white border-primary rounded-tr-none'
+                                    : 'bg-primary/5 text-foreground/70 border-primary/5 rounded-tl-none'
                                     }`}
                             >
                                 {msg.content}
@@ -151,44 +148,44 @@ export default function RoomChat({ roomId }: RoomChatProps) {
             {/* Rate Limit / Error Warning */}
             {
                 error && !rateLimitTimer && (
-                    <div className="px-4 py-2 bg-destructive/10 text-destructive text-xs font-semibold flex items-center">
-                        <AlertCircle className="w-3 h-3 mr-1" />
+                    <div className="mx-6 mb-4 px-4 py-3 bg-destructive/10 text-destructive text-[10px] font-black uppercase tracking-widest font-sans flex items-center rounded-xl border border-destructive/20">
+                        <AlertCircle className="w-3 h-3 mr-2" />
                         {error}
                     </div>
                 )
             }
 
             {/* Input Area */}
-            <div className="p-4 bg-card/50 border-t border-border mt-auto">
+            <div className="p-6 bg-primary/[0.03] border-t border-primary/5 mt-auto">
                 <form onSubmit={handleSendMessage} className="relative">
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder={rateLimitTimer ? `Wait ${rateLimitTimer}s...` : "Type a message..."}
-                        className={`w-full bg-muted/50 border border-input rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all ${rateLimitTimer ? 'cursor-not-allowed opacity-50' : ''}`}
+                        placeholder={rateLimitTimer ? `Synchronizing in ${rateLimitTimer}s...` : "Send a link..."}
+                        className={`w-full bg-background/50 border border-primary/10 rounded-full pl-6 pr-14 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans ${rateLimitTimer ? 'cursor-not-allowed opacity-50' : ''}`}
                         disabled={rateLimitTimer !== null || loading}
                     />
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || rateLimitTimer !== null || loading}
-                        className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-colors ${!newMessage.trim() || rateLimitTimer !== null
-                            ? 'text-muted-foreground/50 cursor-not-allowed'
-                            : 'text-primary hover:bg-primary/10'
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full transition-all ${!newMessage.trim() || rateLimitTimer !== null
+                            ? 'text-foreground/20'
+                            : 'text-white bg-primary shadow-lg shadow-primary/20 hover:scale-105 active:scale-95'
                             }`}
                     >
                         {rateLimitTimer ? (
-                            <span className="text-xs font-bold w-5 text-center block">{rateLimitTimer}</span>
+                            <span className="text-[10px] font-black font-sans">{rateLimitTimer}</span>
                         ) : (
                             <Send className="w-4 h-4" />
                         )}
                     </button>
 
                     {rateLimitTimer !== null && (
-                        <div className="absolute -top-8 left-0 right-0 flex justify-center">
-                            <div className="bg-background/80 backdrop-blur text-xs font-medium text-muted-foreground px-3 py-1 rounded-full border border-border flex items-center shadow-sm">
-                                <Clock className="w-3 h-3 mr-1.5" />
-                                Slow mode active: {rateLimitTimer}s
+                        <div className="absolute -top-12 left-0 right-0 flex justify-center">
+                            <div className="bg-background/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-primary/60 px-4 py-1.5 rounded-full border border-primary/10 flex items-center shadow-xl font-sans">
+                                <Clock className="w-2.5 h-2.5 mr-2" />
+                                Rhythm enforced: {rateLimitTimer}s
                             </div>
                         </div>
                     )}

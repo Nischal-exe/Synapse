@@ -63,107 +63,103 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden pt-24">
+        <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden pt-20">
             <Header onMenuClick={() => setIsSidebarOpen(true)} />
 
             {/* Background elements */}
             <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-[20%] right-[5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[20%] left-[5%] w-[35%] h-[35%] bg-indigo-500/10 rounded-full blur-[120px] animate-float" />
+                <div className="absolute top-[10%] right-[0%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[10%] left-[0%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
+            <div className="max-w-7xl mx-auto px-6 py-12 relative z-10 flex flex-col lg:flex-row gap-12">
                 {/* Overlay for mobile sidebar */}
                 {isSidebarOpen && (
                     <div
-                        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
+                        className="fixed inset-0 bg-black/20 backdrop-blur-md z-40 lg:hidden"
                         onClick={() => setIsSidebarOpen(false)}
                     />
                 )}
 
-                <div className="flex flex-col lg:flex-row gap-10">
-                    {/* Sidebar */}
-                    <Sidebar
-                        key={sidebarKey}
-                        isOpen={isSidebarOpen}
-                        onClose={() => setIsSidebarOpen(false)}
-                    />
+                {/* Sidebar */}
+                <Sidebar
+                    key={sidebarKey}
+                    isOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
+                />
 
-                    {/* Main Content */}
-                    <main className="flex-1 min-w-0">
-                        <header className="mb-12 animate-fade-in">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2.5 bg-primary/10 rounded-xl">
-                                    <Compass className="w-6 h-6 text-primary" />
-                                </div>
-                                <span className="text-sm font-bold text-primary uppercase tracking-widest">Explorer</span>
+                {/* Main Content */}
+                <main className="flex-1 min-w-0">
+                    <header className="mb-20 animate-fade-in text-center lg:text-left">
+                        <div className="flex items-center justify-center lg:justify-start gap-4 mb-8">
+                            <div className="p-3 bg-primary rounded-full shadow-lg shadow-primary/20">
+                                <Compass className="w-5 h-5 text-white" />
                             </div>
-                            <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
-                                Select a <span className="text-gradient">Community</span>
-                            </h1>
-                            <p className="mt-4 text-xl text-muted-foreground max-w-2xl">
-                                Discover study groups, share resources, and excel together with peers across different subjects.
-                            </p>
-                        </header>
+                            <span className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] font-sans">Discovery Hub</span>
+                        </div>
+                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-8">
+                            Select your <br className="hidden md:block" /> path to grow.
+                        </h1>
+                        <p className="text-lg text-foreground/60 max-w-xl leading-relaxed">
+                            Synchronize with communities built on shared knowledge and collective ambition.
+                        </p>
+                    </header>
 
-                        {/* Rooms Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            {loading ? (
-                                <div className="col-span-full py-20 flex flex-col items-center justify-center">
-                                    <LoadingDots />
-                                    <p className="mt-4 text-muted-foreground font-medium">Finding communities...</p>
+                    {/* Rooms Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                        {loading ? (
+                            <div className="col-span-full py-32 flex flex-col items-center justify-center">
+                                <LoadingDots />
+                                <p className="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30 font-sans">Locating Collectives...</p>
+                            </div>
+                        ) : (
+                            rooms.length === 0 ? (
+                                <div className="col-span-full text-center py-32 glass-card rounded-[3rem]">
+                                    <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-8 border border-primary/10">
+                                        <PlusCircle className="w-8 h-8 text-primary/40" />
+                                    </div>
+                                    <h3 className="text-3xl font-bold mb-3">Quiet for now</h3>
+                                    <p className="text-foreground/40 text-xs font-bold uppercase tracking-widest font-sans">
+                                        More collectives are forming.
+                                    </p>
                                 </div>
                             ) : (
-                                rooms.length === 0 ? (
-                                    <div className="col-span-full text-center py-20 glass-card border-dashed">
-                                        <div className="w-20 h-20 bg-muted rounded-3xl flex items-center justify-center mx-auto mb-6">
-                                            <PlusCircle className="w-10 h-10 text-muted-foreground" />
+                                rooms.map((room, idx) => (
+                                    <div
+                                        key={room.id}
+                                        onClick={() => handleRoomClick(room.id)}
+                                        className="glass-card p-10 group transition-all duration-500 cursor-pointer flex flex-col justify-between relative overflow-hidden active:scale-[0.98] animate-slide-up rounded-[2.5rem] border-primary/10 hover:border-primary/30"
+                                        style={{ animationDelay: `${idx * 100}ms` }}
+                                    >
+                                        <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 group-hover:rotate-12 transition-all duration-700 pointer-events-none">
+                                            <Compass className="w-32 h-32 text-primary" />
                                         </div>
-                                        <h3 className="text-2xl font-bold mb-2">No communities found</h3>
-                                        <p className="text-muted-foreground max-w-xs mx-auto text-lg">
-                                            We're still growing! Check back soon for new study groups.
-                                        </p>
-                                    </div>
-                                ) : (
-                                    rooms.map((room, idx) => (
-                                        <div
-                                            key={room.id}
-                                            onClick={() => handleRoomClick(room.id)}
-                                            className="glass-card p-8 group transition-all duration-500 cursor-pointer flex flex-col justify-between relative overflow-hidden active:scale-[0.98] animate-slide-up"
-                                            style={{ animationDelay: `${idx * 100}ms` }}
-                                        >
-                                            <div className="absolute top-0 right-0 p-8 transform translate-x-4 -translate-y-4 opacity-0 group-hover:opacity-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-500">
-                                                <Compass className="w-24 h-24 text-primary" />
-                                            </div>
 
-                                            <div className="relative z-10">
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className="h-12 px-4 bg-primary/10 rounded-xl flex items-center justify-center">
-                                                        <h3 className="text-lg font-black text-primary tracking-tight">
-                                                            {room.name}
-                                                        </h3>
-                                                    </div>
-                                                    <button
-                                                        onClick={(e) => handleJoinRoom(e, room.id)}
-                                                        className={`p-3 rounded-2xl transition-all duration-300 ${room.is_joined ? 'text-white bg-primary shadow-lg shadow-primary/30' : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border border-border'}`}
-                                                    >
-                                                        {room.is_joined ? <CheckCircle className="w-6 h-6" /> : <PlusCircle className="w-6 h-6" />}
-                                                    </button>
-                                                </div>
-                                                <p className="text-muted-foreground text-lg line-clamp-2 mb-8 leading-relaxed">
-                                                    {room.description || "Join the high-quality discussions and resources in the " + room.name + " community."}
-                                                </p>
-                                                <div className="flex items-center text-sm font-bold text-primary group-hover:gap-2 transition-all duration-300">
-                                                    ENTER ROOM <ArrowRight className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
-                                                </div>
+                                        <div className="relative z-10 flex flex-col h-full">
+                                            <div className="flex items-center justify-between mb-8">
+                                                <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                                                    {room.name}
+                                                </h3>
+                                                <button
+                                                    onClick={(e) => handleJoinRoom(e, room.id)}
+                                                    className={`w-12 h-12 rounded-full transition-all duration-500 flex items-center justify-center ${room.is_joined ? 'bg-primary text-white shadow-lg' : 'bg-primary/5 text-primary hover:bg-primary hover:text-white border border-primary/10'}`}
+                                                >
+                                                    {room.is_joined ? <CheckCircle className="w-5 h-5" /> : <PlusCircle className="w-5 h-5" />}
+                                                </button>
+                                            </div>
+                                            <p className="text-foreground/50 text-sm font-sans leading-relaxed mb-10 line-clamp-3">
+                                                {room.description || "A space dedicated to the pursuit of excellence and shared knowledge within our scholarly collective."}
+                                            </p>
+                                            <div className="mt-auto flex items-center text-[10px] font-black tracking-[0.2em] uppercase text-primary font-sans">
+                                                Synchronize <ArrowRight className="w-3 h-3 ml-3 group-hover:translate-x-2 transition-transform duration-500" />
                                             </div>
                                         </div>
-                                    ))
-                                )
-                            )}
-                        </div>
-                    </main>
-                </div>
+                                    </div>
+                                ))
+                            )
+                        )}
+                    </div>
+                </main>
             </div>
         </div>
     );

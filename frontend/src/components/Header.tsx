@@ -1,7 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 interface HeaderProps {
@@ -10,7 +9,6 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
     const { isAuthenticated, user, logout } = useAuth();
-    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -19,74 +17,64 @@ export default function Header({ onMenuClick }: HeaderProps) {
     };
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/10 dark:border-white/5 transition-all duration-500">
-            <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                <div className="flex items-center gap-4">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-primary/5 transition-all duration-500">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+                <div className="flex items-center gap-6">
                     {onMenuClick && (
                         <button
                             onClick={onMenuClick}
-                            className="lg:hidden p-2.5 rounded-xl hover:bg-primary/10 text-muted-foreground transition-all duration-300"
+                            className="lg:hidden p-3 rounded-full hover:bg-primary/5 text-foreground/40 transition-all duration-300"
                         >
                             <Menu className="w-6 h-6" />
                         </button>
                     )}
-                    <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform duration-500">
-                            <img src={logo} alt="S" className="w-6 h-6 object-contain brightness-0 invert" />
+                    <Link to="/" className="flex items-center group">
+                        <div className="h-20 flex items-center transition-all duration-500 group-hover:scale-105">
+                            <img src={logo} alt="Synapse" className="h-16 w-auto object-contain" />
                         </div>
-                        <span className="text-2xl font-black tracking-tighter text-foreground group-hover:text-primary transition-colors duration-300">
-                            SYNAPSE
-                        </span>
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-4 md:gap-8">
-                    <nav className="hidden md:flex items-center gap-8">
-                        <Link to="/dashboard" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors duration-300">
+                <div className="flex items-center gap-4 md:gap-10">
+                    <nav className="hidden md:flex items-center gap-10">
+                        <Link to="/dashboard" className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 hover:text-primary transition-colors duration-300 font-sans">
                             Dashboard
                         </Link>
                     </nav>
 
-                    <div className="h-6 w-px bg-border hidden md:block" />
+                    <div className="h-6 w-px bg-primary/10 hidden md:block" />
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={toggleTheme}
-                            className="p-2.5 rounded-xl hover:bg-muted text-muted-foreground transition-all duration-300"
-                            aria-label="Toggle theme"
-                        >
-                            {theme === 'dark' ? <Sun className="w-5 h-5 animate-spin-slow" /> : <Moon className="w-5 h-5" />}
-                        </button>
+                    <div className="flex items-center gap-4">
 
-                        <div className="hidden sm:flex items-center gap-4">
+                        <div className="hidden sm:flex items-center gap-6">
                             {isAuthenticated ? (
                                 <>
-                                    <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
-                                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold">
+                                    <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
+                                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold font-sans">
                                             {user?.username?.[0].toUpperCase()}
                                         </div>
-                                        <span className="text-sm font-bold text-foreground">{user?.username}</span>
+                                        <span className="text-xs font-bold text-foreground/70 uppercase tracking-widest font-sans">{user?.username}</span>
                                     </div>
                                     <button
                                         onClick={handleLogout}
-                                        className="p-2.5 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-all duration-300"
+                                        className="p-3 rounded-full text-foreground/40 hover:text-destructive hover:bg-destructive/5 transition-all duration-300"
                                     >
                                         <LogOut className="w-5 h-5" />
                                     </button>
                                 </>
                             ) : (
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-4">
                                     <Link
                                         to="/login"
-                                        className="px-5 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
+                                        className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 hover:text-foreground transition-colors font-sans"
                                     >
-                                        Login
+                                        Enter
                                     </Link>
                                     <Link
                                         to="/register"
-                                        className="btn-primary py-2 px-6 text-sm"
+                                        className="btn-primary py-2 px-6 text-[10px] uppercase tracking-[0.2em]"
                                     >
-                                        Join Now
+                                        Join
                                     </Link>
                                 </div>
                             )}
