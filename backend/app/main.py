@@ -23,6 +23,31 @@ with engine.connect() as connection:
              # Also make password nullable
              migration_txn.execute(text("ALTER TABLE users ALTER COLUMN hashed_password DROP NOT NULL;"))
         print("Migration complete.")
+        
+    # Seed Rooms if empty
+    try:
+        result = connection.execute(text("SELECT count(*) FROM rooms"))
+        count = result.scalar()
+        if count == 0:
+            print("Seeding default rooms...")
+            default_rooms = [
+                ("JEE Mains", "Dedicated to JEE Mains preparation and discussion."),
+                ("JEE Advance", "Advanced topics and problem solving for JEE Advance."),
+                ("CAT", "Crack the CAT with peer support and resources."),
+                ("NIMCET", "NIMCET exam preparation community."),
+                ("Programming", "Discuss coding, algorithms, and development."),
+                ("10th", "Study group for 10th grade students."),
+                ("12th", "Study group for 12th grade students.")
+            ]
+            with engine.begin() as seed_txn:
+                for name, desc in default_rooms:
+                    seed_txn.execute(
+                        text("INSERT INTO rooms (name, description) VALUES (:name, :desc)"),
+                        {"name": name, "desc": desc}
+                    )
+            print("Rooms seeded successfully.")
+    except Exception as e:
+        print(f"Error seeding rooms: {e}")
 
 from fastapi.middleware.cors import CORSMiddleware
 
