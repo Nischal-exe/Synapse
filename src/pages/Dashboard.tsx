@@ -151,7 +151,7 @@ export default function Dashboard() {
                                                 {room.description || "A space dedicated to the pursuit of excellence and shared knowledge within our scholarly collective."}
                                             </p>
                                             <div className="mt-auto flex items-center text-[10px] font-black tracking-[0.2em] uppercase text-primary font-sans">
-                                                Synchronize <ArrowRight className="w-3 h-3 ml-3 group-hover:translate-x-2 transition-transform duration-500" />
+                                                Enter Room <ArrowRight className="w-3 h-3 ml-3 group-hover:translate-x-2 transition-transform duration-500" />
                                             </div>
                                         </div>
                                     </div>

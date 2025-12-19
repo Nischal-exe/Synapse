@@ -143,7 +143,7 @@ export default function RoomDetails() {
                             <div className="glass-card bg-white/40 dark:bg-black/40 border-primary/10 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:border-primary/30 transition-all">
                                 <h3 className="text-lg sm:text-xl font-bold text-foreground mb-8 flex items-center">
                                     <span className="w-2 h-2 rounded-full bg-primary mr-4 animate-pulse"></span>
-                                    Initiate Discussion
+                                    Ask a question
                                 </h3>
                                 <form onSubmit={handleCreatePost} className="space-y-6">
                                     <input
@@ -166,7 +166,7 @@ export default function RoomDetails() {
                                             type="submit"
                                             className="btn-primary py-3 px-8 text-[10px] uppercase tracking-[0.2em]"
                                         >
-                                            Submit to Collective
+                                            Post
                                         </button>
                                     </div>
                                 </form>
@@ -177,7 +177,7 @@ export default function RoomDetails() {
                                     <div className="w-16 h-16 bg-primary/5 border border-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <MessageSquare className="w-6 h-6 text-primary/30" />
                                     </div>
-                                    <p className="text-foreground/30 text-[10px] uppercase tracking-widest font-black font-sans">No voices heard in this collective yet.</p>
+                                    <p className="text-foreground/30 text-[10px] uppercase tracking-widest font-black font-sans">No comments yet.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-8 pb-12">

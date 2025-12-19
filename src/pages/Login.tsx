@@ -74,7 +74,7 @@ export default function Login() {
                             <div className="flex justify-between items-center ml-1">
                                 <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] font-sans">Password</label>
                                 <Link to="/forgot-password" title="Forgot Password" className="text-[10px] font-black text-primary hover:text-primary/80 transition-colors uppercase tracking-[0.2em] font-sans">
-                                    Restore Access
+                                    Forget Password
                                 </Link>
                             </div>
                             <div className="relative group">
@@ -97,7 +97,7 @@ export default function Login() {
                         type="submit"
                         className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3"
                     >
-                        Enter Collective
+                        Login
                     </button>
                 </form>
 
@@ -105,7 +105,7 @@ export default function Login() {
                     <p className="text-foreground/40 font-sans text-[10px] uppercase tracking-widest font-bold">
                         Not a member yet?{' '}
                         <Link to="/register" className="text-primary hover:underline underline-offset-8">
-                            Join the Synchronicity
+                            Register
                         </Link>
                     </p>
                 </div>

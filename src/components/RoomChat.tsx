@@ -91,7 +91,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                 setError(err.response.data.detail || "Frequency limit exceeded");
                 setRateLimitTimer(1);
             } else {
-                setError("Collective synchronization failed");
+                setError("Failed to send message");
             }
         } finally {
             setLoading(false);
@@ -104,7 +104,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
             <div className="p-6 border-b border-primary/5 bg-primary/[0.03] backdrop-blur-md">
                 <h3 className="text-sm font-bold text-foreground flex items-center">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3 animate-pulse"></span>
-                    Synchronized Feed
+                    Chat
                 </h3>
             </div>
 
@@ -115,7 +115,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                         <div className="w-12 h-12 rounded-full bg-primary/5 border border-primary/5 flex items-center justify-center mb-4">
                             <Send className="w-4 h-4 text-primary/20" />
                         </div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20 font-sans">Awaiting first link...</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20 font-sans">No messages yet.</p>
                     </div>
                 ) : (
                     messages.map((msg) => (
@@ -162,7 +162,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder={rateLimitTimer ? `Synchronizing in ${rateLimitTimer}s...` : "Send a link..."}
+                        placeholder={rateLimitTimer ? `Please wait ${rateLimitTimer}s...` : "Type a message..."}
                         className={`w-full bg-background/50 border border-primary/10 rounded-full pl-6 pr-14 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans ${rateLimitTimer ? 'cursor-not-allowed opacity-50' : ''}`}
                         disabled={rateLimitTimer !== null || loading}
                     />

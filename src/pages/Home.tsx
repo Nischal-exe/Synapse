@@ -37,7 +37,7 @@ export default function Home() {
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-slide-up [animation-delay:400ms]">
                         <Link to="/register" className="btn-primary text-lg px-12 py-5 uppercase tracking-widest">
-                            Join the Collective
+                            Register
                         </Link>
                     </div>
                 </div>
@@ -77,7 +77,7 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 items-center">
                     <div className="text-center md:text-left">
                         <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-8">Simple steps that feel personal & smooth</h2>
-                        <Link to="/register" className="btn-primary mt-4 py-4 px-10">Join Now</Link>
+                        <Link to="/register" className="btn-primary mt-4 py-4 px-10">Register</Link>
                     </div>
                     <div className="space-y-16 py-10">
                         {[
