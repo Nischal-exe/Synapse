@@ -124,7 +124,7 @@ export default function RoomDetails() {
                             </button>
                             <div>
                                 <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">{room.name}</h1>
-                                <p className="text-[9px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[150px] sm:max-w-none">{room.description}</p>
+                                <p className="text-[9px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[120px] xs:max-w-[200px] sm:max-w-none">{room.description}</p>
                             </div>
                         </div>
                         {/* Mobile Chat Toggle */}
