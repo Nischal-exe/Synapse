@@ -37,12 +37,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     useEffect(() => {
+        // Immediate synchronous check for hash before Supabase swallows it
+        const hash = window.location.hash;
+        if (hash && hash.includes('type=recovery')) {
+            console.log("Recovery mode detected via hash, redirecting...");
+            navigate('/update-password');
+            // Do not return here, let session logic proceed so we are authenticated
+        }
+
         // Check active session
         supabase.auth.getSession().then(({ data: { session } }) => {
-            // Manual check for recovery mode in hash (Backup)
-            if (window.location.hash && window.location.hash.includes('type=recovery')) {
-                navigate('/update-password');
-            }
 
             if (session) {
                 localStorage.setItem('token', session.access_token);
