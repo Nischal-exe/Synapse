@@ -46,7 +46,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         // Listen for Auth Changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                // Determine base URL dynamically or fallback to root
+                const baseUrl = window.location.origin;
+                window.location.href = `${baseUrl}/update-password`;
+                return;
+            }
+
             if (session) {
                 localStorage.setItem('token', session.access_token);
                 setIsAuthenticated(true);
