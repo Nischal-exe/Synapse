@@ -1,4 +1,5 @@
 import { createContext, useState, type ReactNode, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { getMe } from '../services/api';
 
@@ -24,6 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     const fetchInternalUser = async () => {
         try {
@@ -48,9 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Listen for Auth Changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'PASSWORD_RECOVERY') {
-                // Determine base URL dynamically or fallback to root
-                const baseUrl = window.location.origin;
-                window.location.href = `${baseUrl}/update-password`;
+                navigate('/update-password');
                 return;
             }
 
