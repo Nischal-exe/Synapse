@@ -39,6 +39,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         // Check active session
         supabase.auth.getSession().then(({ data: { session } }) => {
+            // Manual check for recovery mode in hash (Backup)
+            if (window.location.hash && window.location.hash.includes('type=recovery')) {
+                navigate('/update-password');
+            }
+
             if (session) {
                 localStorage.setItem('token', session.access_token);
                 setIsAuthenticated(true);
