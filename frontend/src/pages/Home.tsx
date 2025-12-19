@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import Lottie from 'lottie-react';
 
 // Asset Imports
 import concentrateImg from '../assets/concentrate.png';
@@ -7,7 +8,7 @@ import syncImg from '../assets/sync.png';
 import resourceHubImg from '../assets/resource-hub.png';
 import peerImg from '../assets/peer.png';
 import easyImg from '../assets/easy.png';
-import logo from '../assets/logo.png';
+import bearDancing from '../assets/Cutebeardancing.json';
 
 export default function Home() {
     return (
@@ -77,7 +78,11 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 items-center">
                     <div className="text-center md:text-left">
                         <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-8">Simple steps that feel personal & smooth</h2>
-                        <Link to="/register" className="btn-primary mt-4 py-4 px-10">Register</Link>
+                        <Link to="/register" className="mt-8 block hover:scale-105 transition-transform duration-500">
+                            <div className="w-64 h-64 md:w-80 md:h-80 mx-auto">
+                                <Lottie animationData={bearDancing} loop={true} />
+                            </div>
+                        </Link>
                     </div>
                     <div className="space-y-16 py-10">
                         {[
@@ -97,18 +102,11 @@ export default function Home() {
                 </div>
             </section>
 
-            <footer className="relative py-24 px-6 z-10 border-t border-primary/5">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
-                    <div className="h-10">
-                        <img src={logo} alt="Synapse" className="h-full w-auto object-contain brightness-0" />
-                    </div>
-                    <div className="flex gap-12 text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 font-sans">
-                        <Link to="#" className="hover:text-primary">About</Link>
-                        <Link to="#" className="hover:text-primary">Contact</Link>
-                        <Link to="#" className="hover:text-primary">Privacy</Link>
-                    </div>
-                    <div className="text-[10px] uppercase tracking-widest text-foreground/30 font-sans">
-                        © 2025 Collective Knowledge.
+            <footer className="relative py-12 px-6 z-10 border-t border-primary/5">
+                <div className="max-w-7xl mx-auto text-center">
+                    <div className="w-full h-px bg-primary/50 mb-8" />
+                    <div className="text-[12px] uppercase tracking-widest text-foreground/30 font-sans">
+                        @2025 Synapse
                     </div>
                 </div>
             </footer>
