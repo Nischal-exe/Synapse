@@ -11,9 +11,10 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     full_name = Column(String)
     date_of_birth = Column(String)
-    hashed_password = Column(String)
+    hashed_password = Column(String, nullable=True) # made nullable as password now handled by Supabase
     is_verified = Column(Boolean, default=False)
     refresh_token = Column(String, nullable=True)
+    supabase_id = Column(String, unique=True, nullable=True, index=True)
 
     posts = relationship("Post", back_populates="owner")
     comments = relationship("Comment", back_populates="owner")

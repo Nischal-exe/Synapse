@@ -1,162 +1,73 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta
-from .. import schemas, crud, database, auth, utils, email_utils
-from ..redis_client import redis_client
-import uuid
+from .. import schemas, crud, database, auth
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
 )
 
-@router.post("/signup", response_model=schemas.User)
-@router.post("/signup", response_model=schemas.User)
-async def signup(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
-    db_user = crud.get_user(db, username=user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
+@router.post("/sync", response_model=schemas.User)
+def sync_user_profile(
+    profile: schemas.UserProfileSync,
+    identity: dict = Depends(auth.get_supabase_identity),
+    db: Session = Depends(database.get_db)
+):
+    """
+    Syncs the Supabase user with the local database.
+    Creates a new user record if one doesn't exist, linking it via supabase_id.
+    """
+    supabase_uid = identity["supabase_id"]
+    email = identity["email"]
     
-    db_email = crud.get_user_by_email(db, email=user.email)
-    if db_email:
-        if db_email.is_verified:
-            raise HTTPException(status_code=400, detail="Email already registered")
-        else:
-            # Update user details on retry
-            db_email.hashed_password = auth.get_password_hash(user.password)
-            db_email.full_name = user.full_name
-            db_email.date_of_birth = user.date_of_birth
-            db_email.username = user.username
-            # db_email.is_verified = True # Auto-verify removed
-            db.commit()
-            db.refresh(db_email)
-
-            # Resend OTP
-            otp = utils.generate_otp()
-            print(f"DEBUG OTP for {user.email}: {otp}")
-            redis_client.setex(f"otp:{user.email}", 300, otp)
-            # Resend OTP
-            otp = utils.generate_otp()
-            print(f"DEBUG OTP for {user.email}: {otp}")
-            redis_client.setex(f"otp:{user.email}", 300, otp)
-            await email_utils.send_otp_email(user.email, otp)
-            return db_email
-
-    # New User
-    new_user = crud.create_user(db=db, user=user)
-    # new_user.is_verified = True # Auto-verify removed
-    db.commit()
-    otp = utils.generate_otp()
-    print(f"DEBUG OTP for {user.email}: {otp}")
-    redis_client.setex(f"otp:{user.email}", 300, otp)
-    otp = utils.generate_otp()
-    print(f"DEBUG OTP for {user.email}: {otp}")
-    redis_client.setex(f"otp:{user.email}", 300, otp)
-    await email_utils.send_otp_email(user.email, otp)
-    return new_user
-
-@router.post("/verify")  # removed response_model=schemas.Token to allow dict
-def verify_otp(verify_data: schemas.UserVerify, db: Session = Depends(database.get_db)):
-    # Check Redis
-    stored_otp = redis_client.get(f"otp:{verify_data.email}")
-    if not stored_otp or stored_otp != verify_data.otp:
-        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+    # 1. Check if user already exists by supabase_id
+    user = db.query(crud.models.User).filter(crud.models.User.supabase_id == supabase_uid).first()
+    if user:
+        return user
     
-    # Update DB
-    user = crud.get_user_by_email(db, email=verify_data.email)
-    if not user:
-        raise HTTPException(status_code=400, detail="User not found")
-    
-    user.is_verified = True
-    db.commit()
-    db.refresh(user)
+    # 2. Check if username is taken
+    if crud.get_user(db, username=profile.username):
+        raise HTTPException(status_code=400, detail="Username already taken")
 
-    # We do NOT generate tokens here anymore. User must login explicitly.
+    # 3. Check for existing user by email (Auto-Linking Strategy)
+    # This handles cases where a user existed in the system before Supabase migration
+    existing_user_by_email = crud.get_user_by_email(db, email=email)
     
-    return {"message": "Email verified successfully"}
+    if existing_user_by_email:
+        if existing_user_by_email.supabase_id and existing_user_by_email.supabase_id != supabase_uid:
+            # Should be impossible if email is unique in Supabase and DB, 
+            # unless Supabase verified a different email that matches DB email.
+            raise HTTPException(status_code=400, detail="Email already linked to another account")
+        
+        # Link the existing user
+        existing_user_by_email.supabase_id = supabase_uid
+        existing_user_by_email.is_verified = True
+        
+        # Optionally update fields derived from the sync request if they are empty in DB
+        if not existing_user_by_email.full_name and profile.full_name:
+            existing_user_by_email.full_name = profile.full_name
+            
+        db.commit()
+        db.refresh(existing_user_by_email)
+        return existing_user_by_email
 
-@router.post("/login", response_model=schemas.Token)
-def login(user_credentials: schemas.UserLogin, db: Session = Depends(database.get_db)):
-    user = crud.get_user(db, username=user_credentials.username)
-    if not user or not auth.verify_password(user_credentials.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    if not user.is_verified:
-        raise HTTPException(status_code=400, detail="Email not verified")
-
-    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+    # 4. Create New User
+    new_user = crud.models.User(
+        username=profile.username,
+        email=email,
+        full_name=profile.full_name,
+        date_of_birth=profile.date_of_birth,
+        supabase_id=supabase_uid,
+        is_verified=True,
+        hashed_password=None # Password managed by Supabase
     )
     
-    # Refresh Token
-    refresh_token = str(uuid.uuid4())
-    redis_client.setex(f"refresh:{user.email}", auth.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60, refresh_token)
-
-    return {
-        "access_token": access_token, 
-        "refresh_token": refresh_token, 
-        "token_type": "bearer"
-    }
-
-@router.post("/forgot-password")
-@router.post("/forgot-password")
-async def forgot_password(request: schemas.PasswordResetRequest, db: Session = Depends(database.get_db)):
-    user = crud.get_user_by_email(db, email=request.email)
-    if not user:
-        # We return 200 even if user not found to prevent email enumeration, 
-        # but for debugging let's be explicit or handle it silently.
-        # For this stage, let's return 404 to help the user debug.
-        raise HTTPException(status_code=404, detail="User with this email does not exist")
-
-    otp = utils.generate_otp()
-    print(f"DEBUG RESET OTP for {request.email}: {otp}")
-    redis_client.setex(f"reset_otp:{request.email}", 300, otp)
-    
-    # We can reuse the OTP email function or create a new one. 
-    # For now, reusing the existing one is fine as the message is generic "Verification Code".
-    # We can reuse the OTP email function or create a new one. 
-    # For now, reusing the existing one is fine as the message is generic "Verification Code".
-    await email_utils.send_otp_email(request.email, otp)
-    
-    return {"message": "Password reset OTP sent to email"}
-
-@router.post("/verify-reset-otp")
-def verify_reset_otp(verify_data: schemas.PasswordResetVerify):
-    stored_otp = redis_client.get(f"reset_otp:{verify_data.email}")
-    if not stored_otp or stored_otp != verify_data.otp:
-        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
-    
-    return {"message": "OTP verified successfully"}
-
-@router.post("/reset-password")
-def reset_password(confirm_data: schemas.PasswordResetConfirm, db: Session = Depends(database.get_db)):
-    # 1. Verify OTP again to be sure
-    stored_otp = redis_client.get(f"reset_otp:{confirm_data.email}")
-    if not stored_otp or stored_otp != confirm_data.otp:
-        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
-    
-    # 2. Check Password Complexity (1 digit, 1 uppercase)
-    import re
-    if not re.search(r"\d", confirm_data.new_password):
-        raise HTTPException(status_code=400, detail="Password must contain at least one number")
-    if not re.search(r"[A-Z]", confirm_data.new_password):
-        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
-    
-    # 3. Update Password
-    user = crud.get_user_by_email(db, email=confirm_data.email)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    user.hashed_password = auth.get_password_hash(confirm_data.new_password)
-    db.commit()
-    
-    # 4. Cleanup
-    redis_client.delete(f"reset_otp:{confirm_data.email}")
-    
-    return {"message": "Password has been reset successfully"}
+    try:
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return new_user
+    except Exception as e:
+        print(f"Error creating user: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to create user profile")

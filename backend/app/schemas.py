@@ -11,6 +11,11 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+class UserProfileSync(BaseModel):
+    username: str
+    full_name: Optional[str] = None
+    date_of_birth: Optional[str] = None
+
 class UserLogin(BaseModel):
     username: str
     password: str

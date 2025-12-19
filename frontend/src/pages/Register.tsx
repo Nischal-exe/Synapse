@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import { supabase } from '../supabaseClient';
 import logo from '../assets/logo.png';
 import { User, Mail, Lock, Calendar, ArrowRight, UserCircle } from 'lucide-react';
 
@@ -17,17 +17,23 @@ export default function Register() {
         e.preventDefault();
         setError(null);
         try {
-            await api.post('/auth/signup', {
-                username,
+            const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
-                full_name: fullName,
-                date_of_birth: dob,
+                options: {
+                    data: {
+                        username,
+                        full_name: fullName,
+                        date_of_birth: dob
+                    }
+                }
             });
+
+            if (error) throw error;
+
             navigate('/verify', { state: { email } });
-        } catch (err: unknown) {
-            const errorData = err as { response?: { data?: { detail?: string } } };
-            setError(errorData.response?.data?.detail || 'Registration failed');
+        } catch (err: any) {
+            setError(err.message || 'Registration failed');
         }
     };
 

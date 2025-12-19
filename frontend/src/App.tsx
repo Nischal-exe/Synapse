@@ -10,8 +10,19 @@ import Dashboard from './pages/Dashboard';
 import RoomDetails from './pages/RoomDetails';
 import './index.css';
 
+import LoadingDots from './components/LoadingDots';
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-primary"><LoadingDots /></div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
