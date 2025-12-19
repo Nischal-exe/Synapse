@@ -1,105 +1,114 @@
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 
+// Asset Imports
+import concentrateImg from '../assets/concentrate.png';
+import syncImg from '../assets/sync.png';
+import resourceHubImg from '../assets/resource-hub.png';
+import peerImg from '../assets/peer.png';
+import easyImg from '../assets/easy.png';
+import logo from '../assets/logo.png';
+
 export default function Home() {
     return (
-        <div className="min-h-screen bg-background transition-colors duration-500 overflow-x-hidden">
+        <div className="min-h-screen bg-background transition-colors duration-500 overflow-x-hidden pt-20">
             <Header />
 
             {/* Background elements */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-                <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute top-[20%] -right-[10%] w-[35%] h-[35%] bg-indigo-500/10 rounded-full blur-[120px] animate-float" />
-                <div className="absolute bottom-[0%] left-[20%] w-[30%] h-[30%] bg-purple-500/5 rounded-full blur-[100px]" />
+                <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[10%] right-[5%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
             {/* Hero Section */}
-            <section className="relative pt-40 pb-24 px-6 z-10">
+            <section className="relative pt-24 pb-20 px-6 z-10 border-b border-primary/10">
                 <div className="max-w-7xl mx-auto text-center">
-                    <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold animate-fade-in tracking-wide uppercase">
-                        The future of collaborative learning
+                    <div className="inline-block px-6 py-2 mb-8 rounded-full bg-primary/5 border border-primary/20 text-primary text-xs font-bold animate-fade-in tracking-[0.2em] uppercase">
+                        Collab • Learn • Sync
                     </div>
-                    <h2 className="text-6xl md:text-8xl font-extrabold mb-8 tracking-tight animate-slide-up leading-[1.1]">
-                        Learn Together,
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-bold mb-10 tracking-tight animate-slide-up leading-[0.9] text-foreground">
+                        Crafting Future
                         <br />
-                        <span className="text-gradient">Grow Together</span>
+                        Together.
+                    </h1>
+                    <p className="text-lg md:text-2xl text-foreground/70 mb-14 max-w-2xl mx-auto animate-slide-up [animation-delay:200ms] leading-relaxed px-4">
+                        Synapse is a minimalist space for collaborative learning.
+                        Zero distractions, just meaningful academic growth.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-slide-up [animation-delay:400ms]">
+                        <Link to="/register" className="btn-primary text-lg px-12 py-5 uppercase tracking-widest">
+                            Join the Collective
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
+            {/* Image Features Section (Mimicking the reference) */}
+            <section className="relative py-32 px-6 z-10 bg-primary text-primary-foreground">
+                <div className="max-w-5xl mx-auto text-center">
+                    <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-12 md:20 leading-tight px-4">
+                        Highlight quality, simplicity, <br className="hidden md:block" /> and artisan approach.
                     </h2>
-                    <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto animate-slide-up [animation-delay:200ms]">
-                        Synapse connects students in collaborative study groups, enabling knowledge sharing,
-                        peer learning, and academic growth through an intuitive social platform.
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-slide-up [animation-delay:400ms]">
-                        <Link to="/register" className="btn-primary text-xl px-10 py-4 shadow-xl">
-                            Unlock Your Potential
-                        </Link>
-                        <Link to="/login" className="btn-secondary text-xl px-10 py-4">
-                            Log In
-                        </Link>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 md:gap-16">
+                        {[
+                            { name: 'Pure Focus', desc: 'Zero distractions for your deep work sessions.', img: concentrateImg },
+                            { name: 'Live Sync', desc: 'Real-time collaboration across all your devices.', img: syncImg },
+                            { name: 'Resource Hub', desc: 'A central library for all your study materials.', img: resourceHubImg },
+                            { name: 'Peer Support', desc: 'Learn from mentors and fellow students.', img: peerImg },
+                            { name: 'Easy Path', desc: 'Streamlined workflows for academic success.', img: easyImg }
+                        ].map((item, i) => (
+                            <div key={i} className="flex flex-col items-center space-y-6">
+                                <div className="w-20 h-20 rounded-full border-2 border-primary-foreground/30 flex items-center justify-center overflow-hidden bg-white/10 group hover:scale-110 transition-transform duration-500">
+                                    <img src={item.img} alt={item.name} className="w-12 h-12 object-contain brightness-0 invert" />
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-bold uppercase tracking-widest mb-2 font-sans">{item.name}</h4>
+                                    <p className="text-[10px] uppercase tracking-wider opacity-60 leading-tight font-sans">{item.desc}</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section className="relative py-24 px-6 z-10">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-20 animate-fade-in">
-                        <h3 className="text-4xl md:text-5xl font-bold mb-6">Why Choose Synapse?</h3>
-                        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                            Designed to streamline your academic journey through powerful collaboration.
-                        </p>
+            {/* Value Props */}
+            <section className="relative py-32 px-6 z-10">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 items-center">
+                    <div className="text-center md:text-left">
+                        <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-8">Simple steps that feel personal & smooth</h2>
+                        <Link to="/register" className="btn-primary mt-4 py-4 px-10">Join Now</Link>
                     </div>
-
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {/* Feature 1 */}
-                        <div className="glass-card p-8 group transition-all duration-500 hover:-translate-y-2 hover:border-primary/50" style={{ animationDelay: '0.1s' }}>
-                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
+                    <div className="space-y-16 py-10">
+                        {[
+                            { n: '01', t: 'Explore', d: 'Discover study groups tailored to your curriculum and academic interests.' },
+                            { n: '02', t: 'Collaborate', d: 'Engage in real-time discussions and share valuable resources with your peers.' },
+                            { n: '03', t: 'Achieve', d: 'Reach your academic goals through collective effort and shared wisdom.' }
+                        ].map((step) => (
+                            <div key={step.n} className="flex gap-12 items-start group">
+                                <span className="text-4xl sm:text-6xl font-normal italic opacity-20 group-hover:opacity-100 group-hover:text-primary transition-all duration-500 shrink-0">{step.n}</span>
+                                <div className="pt-2">
+                                    <h4 className="text-lg md:text-xl font-bold uppercase tracking-widest mb-4 font-sans">{step.t}</h4>
+                                    <p className="text-foreground/60 leading-relaxed font-sans text-sm max-w-sm">{step.d}</p>
+                                </div>
                             </div>
-                            <h4 className="text-2xl font-bold mb-4">Study Groups</h4>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
-                                Create or join study groups based on subjects, courses, or topics. Collaborate with peers who share your academic goals.
-                            </p>
-                        </div>
-
-                        {/* Feature 2 */}
-                        <div className="glass-card p-8 group transition-all duration-500 hover:-translate-y-2 hover:border-primary/50" style={{ animationDelay: '0.2s' }}>
-                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <h4 className="text-2xl font-bold mb-4">Knowledge Sharing</h4>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
-                                Share notes, resources, and insights with your study community. Build a collective knowledge base that benefits everyone.
-                            </p>
-                        </div>
-
-                        {/* Feature 3 */}
-                        <div className="glass-card p-8 group transition-all duration-500 hover:-translate-y-2 hover:border-primary/50" style={{ animationDelay: '0.3s' }}>
-                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                            <h4 className="text-2xl font-bold mb-4">Real-time Updates</h4>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
-                                Stay connected with instant notifications, live discussions, and real-time collaboration tools that keep sessions productive.
-                            </p>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            <footer className="relative py-20 px-6 z-10 border-t border-border bg-background/50 backdrop-blur-md">
-                <div className="max-w-7xl mx-auto text-center">
-                    <div className="text-3xl font-extrabold mb-8 text-primary tracking-tighter">SYNAPSE</div>
-                    <p className="text-muted-foreground mb-8 text-lg">
-                        Empowering students through the power of collaboration.
-                    </p>
-                    <div className="text-sm text-muted-foreground/60">
-                        © 2025 Synapse. All rights reserved. Made with ❤️ for students.
+            <footer className="relative py-24 px-6 z-10 border-t border-primary/5">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
+                    <div className="h-10">
+                        <img src={logo} alt="Synapse" className="h-full w-auto object-contain brightness-0" />
+                    </div>
+                    <div className="flex gap-12 text-xs font-bold uppercase tracking-[0.2em] text-foreground/40 font-sans">
+                        <Link to="#" className="hover:text-primary">About</Link>
+                        <Link to="#" className="hover:text-primary">Contact</Link>
+                        <Link to="#" className="hover:text-primary">Privacy</Link>
+                    </div>
+                    <div className="text-[10px] uppercase tracking-widest text-foreground/30 font-sans">
+                        © 2025 Collective Knowledge.
                     </div>
                 </div>
             </footer>

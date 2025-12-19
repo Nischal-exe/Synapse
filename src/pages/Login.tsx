@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import logo from '../assets/logo.png';
 import { Link } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react'; // Changed User to Mail
+import { Mail, Lock } from 'lucide-react'; // Changed User to Mail
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -29,64 +29,62 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background py-12 px-6 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-background py-16 px-6 relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-[10%] left-[10%] w-[30%] h-[30%] bg-primary/10 rounded-full blur-[100px] animate-pulse" />
-                <div className="absolute bottom-[10%] right-[10%] w-[30%] h-[30%] bg-indigo-500/10 rounded-full blur-[100px] animate-float" />
+                <div className="absolute top-[15%] left-[10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px]" />
+                <div className="absolute bottom-[15%] right-[10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px]" />
             </div>
 
-            <div className="max-w-md w-full glass-card p-10 relative z-10 animate-fade-in shadow-2xl">
-                <div className="text-center mb-10">
-                    <Link to="/" className="inline-block group transition-transform duration-500 hover:scale-110">
-                        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-xl shadow-primary/30 mx-auto mb-6">
-                            <img className="h-10 w-10 object-contain brightness-0 invert" src={logo} alt="Synapse" />
-                        </div>
+            <div className="max-w-md w-full glass-card p-12 relative z-10 animate-fade-in border-primary/20 bg-white/50 dark:bg-black/50">
+                <div className="text-center mb-12">
+                    <Link to="/" className="inline-block mb-8 hover:scale-105 transition-transform duration-500">
+                        <img className="h-12 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
                     </Link>
-                    <h2 className="text-4xl font-extrabold tracking-tight text-foreground mb-3">Welcome Back</h2>
-                    <p className="text-muted-foreground font-medium">Continue your collaborative journey with Synapse</p>
+                    <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Welcome Back</h2>
+                    <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold">The collective awaits your presence.</p>
                 </div>
 
-                <form className="space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-8" onSubmit={handleSubmit}>
                     {error && (
-                        <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm font-semibold p-4 rounded-xl animate-shake">
+                        <div className="bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold p-5 rounded-2xl animate-shake font-sans uppercase tracking-wider">
                             {error}
                         </div>
                     )}
 
-                    <div className="space-y-5">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-muted-foreground ml-1">Email Address</label>
+                    <div className="space-y-6">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] ml-1 font-sans">Email Address</label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <Mail className="h-4 w-4 text-foreground/30 group-focus-within:text-primary transition-colors" />
                                 </div>
                                 <input
                                     type="email"
                                     required
-                                    className="block w-full pl-12 pr-4 py-4 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium"
-                                    placeholder="you@example.com"
+                                    className="block w-full pl-14 pr-5 py-4 bg-primary/5 border border-primary/10 rounded-full text-foreground placeholder-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-sans text-sm"
+                                    placeholder="Enter your email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             <div className="flex justify-between items-center ml-1">
-                                <label className="text-sm font-bold text-muted-foreground">Password</label>
-                                <Link to="/forgot-password" title="Forgot Password" className="text-xs font-bold text-primary hover:text-primary/80 transition-colors">
-                                    Forgot password?
+                                <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] font-sans">Password</label>
+                                <Link to="/forgot-password" title="Forgot Password" className="text-[10px] font-black text-primary hover:text-primary/80 transition-colors uppercase tracking-[0.2em] font-sans">
+                                    Restore Access
                                 </Link>
                             </div>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <Lock className="h-4 w-4 text-foreground/30 group-focus-within:text-primary transition-colors" />
                                 </div>
                                 <input
                                     type="password"
                                     required
-                                    className="block w-full pl-12 pr-4 py-4 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium"
+                                    className="block w-full pl-14 pr-5 py-4 bg-primary/5 border border-primary/10 rounded-full text-foreground placeholder-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-sans text-sm"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -97,18 +95,17 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2 group"
+                        className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3"
                     >
-                        Sign In
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        Enter Collective
                     </button>
                 </form>
 
-                <div className="text-center mt-10">
-                    <p className="text-muted-foreground font-medium">
-                        New to Synapse?{' '}
-                        <Link to="/register" className="text-primary font-bold hover:underline decoration-2 underline-offset-4">
-                            Create an account
+                <div className="text-center mt-12">
+                    <p className="text-foreground/40 font-sans text-[10px] uppercase tracking-widest font-bold">
+                        Not a member yet?{' '}
+                        <Link to="/register" className="text-primary hover:underline underline-offset-8">
+                            Join the Synchronicity
                         </Link>
                     </p>
                 </div>
