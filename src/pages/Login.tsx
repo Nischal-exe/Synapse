@@ -1,28 +1,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../supabaseClient';
 import logo from '../assets/logo.png';
 import { Link } from 'react-router-dom';
-import { User, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react'; // Changed User to Mail
 
 export default function Login() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         try {
-            const response = await api.post('/auth/login', { username, password });
-            login(response.data.access_token);
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) throw error;
+
             navigate('/dashboard');
-        } catch (err: unknown) {
-            const errorData = err as { response?: { data?: { detail?: string } } };
-            setError(errorData.response?.data?.detail || 'Login failed');
+        } catch (err: any) {
+            setError(err.message || 'Login failed');
         }
     };
 
@@ -54,18 +56,18 @@ export default function Login() {
 
                     <div className="space-y-5">
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-muted-foreground ml-1">Username</label>
+                            <label className="text-sm font-bold text-muted-foreground ml-1">Email Address</label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <User className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                    <Mail className="h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 </div>
                                 <input
-                                    type="text"
+                                    type="email"
                                     required
                                     className="block w-full pl-12 pr-4 py-4 bg-muted/30 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium"
-                                    placeholder="your_username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    placeholder="you@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                         </div>

@@ -1,4 +1,5 @@
 import { createContext, useState, type ReactNode, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import { getMe } from '../services/api';
 
 interface User {
@@ -6,50 +7,67 @@ interface User {
     username: string;
     email: string;
     full_name: string;
+    supabase_id?: string;
 }
 
 interface AuthContextType {
     isAuthenticated: boolean;
     user: User | null;
-    login: (token: string) => void;
+    loading: boolean;
     logout: () => void;
+    checkUser: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-        return !!localStorage.getItem('token');
-    });
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            getMe().then(userData => {
-                setUser(userData);
-            }).catch(() => {
-                // If fetching user fails, maybe token is invalid?
-                // For now, simple error handling or logout could happen here
-                console.error("Failed to fetch user");
-            });
-        } else {
-            setUser(null);
+    const fetchInternalUser = async () => {
+        try {
+            const userData = await getMe();
+            setUser(userData);
+        } catch (err) {
+            console.error("Failed to fetch internal user profile", err);
         }
-    }, [isAuthenticated]);
-
-    const login = (token: string) => {
-        localStorage.setItem('token', token);
-        setIsAuthenticated(true);
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setIsAuthenticated(false);
-        setUser(null);
+    useEffect(() => {
+        // Check active session
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                localStorage.setItem('token', session.access_token);
+                setIsAuthenticated(true);
+                fetchInternalUser();
+            }
+            setLoading(false);
+        });
+
+        // Listen for Auth Changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session) {
+                localStorage.setItem('token', session.access_token);
+                setIsAuthenticated(true);
+                if (!user) fetchInternalUser();
+            } else {
+                localStorage.removeItem('token');
+                setIsAuthenticated(false);
+                setUser(null);
+            }
+            setLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const logout = async () => {
+        await supabase.auth.signOut();
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, loading, logout, checkUser: fetchInternalUser }}>
             {children}
         </AuthContext.Provider>
     );
