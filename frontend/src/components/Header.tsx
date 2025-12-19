@@ -68,13 +68,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
                                         to="/login"
                                         className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 hover:text-foreground transition-colors font-sans"
                                     >
-                                        Enter
+                                        Login
                                     </Link>
                                     <Link
                                         to="/register"
                                         className="btn-primary py-2 px-6 text-[10px] uppercase tracking-[0.2em]"
                                     >
-                                        Join
+                                        Register
                                     </Link>
                                 </div>
                             )}

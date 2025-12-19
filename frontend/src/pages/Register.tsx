@@ -51,8 +51,8 @@ export default function Register() {
                     <Link to="/" className="inline-block mb-8 hover:scale-105 transition-transform duration-500">
                         <img className="h-12 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
                     </Link>
-                    <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Join the Collective</h2>
-                    <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold">Synchronize with thousands of global learners.</p>
+                    <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Register</h2>
+                    <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold">Join thousands of learners.</p>
                 </div>
 
                 <form className="space-y-8" onSubmit={handleSubmit}>
@@ -152,7 +152,7 @@ export default function Register() {
                         type="submit"
                         className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 mt-4"
                     >
-                        Initiate Sync
+                        Register
                     </button>
                 </form>
 
@@ -160,7 +160,7 @@ export default function Register() {
                     <p className="text-foreground/40 font-sans text-[10px] uppercase tracking-widest font-bold">
                         Already part of the collective?{' '}
                         <Link to="/login" className="text-primary hover:underline underline-offset-8">
-                            Enter existing port
+                            Login
                         </Link>
                     </p>
                 </div>
