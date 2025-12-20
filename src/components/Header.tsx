@@ -46,14 +46,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
                     <div className="flex items-center gap-4">
 
-                        <div className="hidden sm:flex items-center gap-6">
+                        <div className="flex items-center gap-3 sm:gap-6">
                             {isAuthenticated ? (
                                 <>
-                                    <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
+                                    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
                                         <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold font-sans">
                                             {user?.username?.[0].toUpperCase()}
                                         </div>
-                                        <span className="text-xs font-bold text-foreground/70 uppercase tracking-widest font-sans">{user?.username}</span>
+                                        <span className="hidden sm:block text-xs font-bold text-foreground/70 uppercase tracking-widest font-sans">{user?.username}</span>
                                     </div>
                                     <button
                                         onClick={handleLogout}
@@ -63,7 +63,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                                     </button>
                                 </>
                             ) : (
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 sm:gap-4">
                                     <Link
                                         to="/login"
                                         className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 hover:text-foreground transition-colors font-sans"
@@ -72,7 +72,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                                     </Link>
                                     <Link
                                         to="/register"
-                                        className="btn-primary py-2 px-6 text-[10px] uppercase tracking-[0.2em]"
+                                        className="btn-primary py-2 px-4 sm:px-6 text-[10px] uppercase tracking-[0.2em]"
                                     >
                                         Register
                                     </Link>
