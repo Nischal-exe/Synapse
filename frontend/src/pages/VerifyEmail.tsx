@@ -34,7 +34,7 @@ export default function VerifyEmail() {
                                     type: 'signup',
                                     email: email,
                                     options: {
-                                        emailRedirectTo: `${import.meta.env.PROD ? 'https://synapsepro.online' : window.location.origin}/login`
+                                        emailRedirectTo: `${window.location.origin}/login`
                                     }
                                 }));
                                 if (error) alert('Error resending email: ' + error.message);

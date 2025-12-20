@@ -21,7 +21,7 @@ export default function Register() {
                 email,
                 password,
                 options: {
-                    emailRedirectTo: `${import.meta.env.PROD ? 'https://synapsepro.online' : window.location.origin}/login`,
+                    emailRedirectTo: `${window.location.origin}/login`,
                     data: {
                         username,
                         full_name: fullName,
