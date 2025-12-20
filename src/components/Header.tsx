@@ -28,32 +28,32 @@ export default function Header({ onMenuClick }: HeaderProps) {
                             <Menu className="w-6 h-6" />
                         </button>
                     )}
-                    <Link to="/" className="flex items-center group">
-                        <div className="h-20 flex items-center transition-all duration-500 group-hover:scale-105">
+                    <div className="flex items-center group cursor-default">
+                        <div className="h-20 flex items-center transition-all duration-500">
                             <img src={logo} alt="Synapse" className="h-16 w-auto object-contain" />
                         </div>
-                    </Link>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-4 md:gap-10">
-                    <nav className="hidden md:flex items-center gap-10">
+                <div className="flex items-center gap-2 sm:gap-4 md:gap-10">
+                    <nav className="flex items-center gap-3 sm:gap-6 md:gap-10">
                         <Link to="/dashboard" className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 hover:text-primary transition-colors duration-300 font-sans">
                             Dashboard
                         </Link>
                     </nav>
 
-                    <div className="h-6 w-px bg-primary/10 hidden md:block" />
+                    <div className="h-6 w-px bg-primary/10 hidden sm:block" />
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4">
 
-                        <div className="flex items-center gap-3 sm:gap-6">
+                        <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
                             {isAuthenticated ? (
                                 <>
                                     <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
                                         <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold font-sans">
                                             {user?.username?.[0].toUpperCase()}
                                         </div>
-                                        <span className="hidden sm:block text-xs font-bold text-foreground/70 uppercase tracking-widest font-sans">{user?.username}</span>
+                                        <span className="text-xs font-bold text-foreground/70 uppercase tracking-widest font-sans">{user?.username}</span>
                                     </div>
                                     <button
                                         onClick={handleLogout}

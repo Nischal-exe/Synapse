@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import { useAuth } from '../hooks/useAuth';
 import Lottie from 'lottie-react';
 
 // Asset Imports
@@ -11,6 +12,8 @@ import easyImg from '../assets/easy.png';
 import bearDancing from '../assets/Cutebeardancing.json';
 
 export default function Home() {
+    const { isAuthenticated } = useAuth();
+
     return (
         <div className="min-h-screen bg-background transition-colors duration-500 overflow-x-hidden pt-20">
             <Header />
@@ -37,9 +40,15 @@ export default function Home() {
                         Zero distractions, just meaningful academic growth.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-slide-up [animation-delay:400ms]">
-                        <Link to="/register" className="btn-primary text-lg px-12 py-5 uppercase tracking-widest">
-                            Register
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link to="/dashboard" className="btn-primary text-lg px-12 py-5 uppercase tracking-widest">
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <Link to="/register" className="btn-primary text-lg px-12 py-5 uppercase tracking-widest">
+                                Register
+                            </Link>
+                        )}
                     </div>
                 </div>
             </section>
@@ -78,11 +87,13 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 items-center">
                     <div className="text-center md:text-left">
                         <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-8">Simple steps that feel personal & smooth</h2>
-                        <Link to="/register" className="mt-8 block hover:scale-105 transition-transform duration-500">
-                            <div className="w-64 h-64 md:w-80 md:h-80 mx-auto">
-                                <Lottie animationData={bearDancing} loop={true} />
-                            </div>
-                        </Link>
+                        {!isAuthenticated && (
+                            <Link to="/register" className="mt-8 block hover:scale-105 transition-transform duration-500">
+                                <div className="w-64 h-64 md:w-80 md:h-80 mx-auto">
+                                    <Lottie animationData={bearDancing} loop={true} />
+                                </div>
+                            </Link>
+                        )}
                     </div>
                     <div className="space-y-16 py-10">
                         {[
