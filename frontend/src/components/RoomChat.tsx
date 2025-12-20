@@ -16,9 +16,10 @@ interface ChatMessage {
 
 interface RoomChatProps {
     roomId: number;
+    isMember: boolean;
 }
 
-export default function RoomChat({ roomId }: RoomChatProps) {
+export default function RoomChat({ roomId, isMember }: RoomChatProps) {
     const { user } = useAuth();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
@@ -71,6 +72,10 @@ export default function RoomChat({ roomId }: RoomChatProps) {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!isMember) {
+            setError("Please join the room to participate in the chat.");
+            return;
+        }
         if (!newMessage.trim() || rateLimitTimer !== null) return;
 
         setLoading(true);
@@ -90,6 +95,8 @@ export default function RoomChat({ roomId }: RoomChatProps) {
             if (err.response && err.response.status === 429) {
                 setError(err.response.data.detail || "Frequency limit exceeded");
                 setRateLimitTimer(1);
+            } else if (err.response && err.response.status === 403) {
+                setError("Please join the room to send messages.");
             } else {
                 setError("Failed to send message");
             }
@@ -162,9 +169,9 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder={rateLimitTimer ? `Please wait ${rateLimitTimer}s...` : "Type a message..."}
-                        className={`w-full bg-background/50 border border-primary/10 rounded-full pl-6 pr-14 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans ${rateLimitTimer ? 'cursor-not-allowed opacity-50' : ''}`}
-                        disabled={rateLimitTimer !== null || loading}
+                        placeholder={!isMember ? "Join room to chat..." : (rateLimitTimer ? `Please wait ${rateLimitTimer}s...` : "Type a message...")}
+                        className={`w-full bg-background/50 border border-primary/10 rounded-full pl-6 pr-14 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans ${rateLimitTimer || !isMember ? 'cursor-not-allowed opacity-50' : ''}`}
+                        disabled={rateLimitTimer !== null || loading || !isMember}
                     />
                     <button
                         type="submit"

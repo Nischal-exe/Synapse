@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import LoadingDots from '../components/LoadingDots';
 import PostItem from '../components/PostItem';
 import RoomChat from '../components/RoomChat';
-import { getPosts, getRooms, createPost } from '../services/api';
+import { getPosts, getRooms, createPost, getSidebarData, joinRoom } from '../services/api';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
 import Header from '../components/Header';
 
@@ -37,6 +37,28 @@ export default function RoomDetails() {
     const [isChatOpen, setIsChatOpen] = useState(false); // For mobile chat toggle
     const [newPostTitle, setNewPostTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState('');
+    const [isMember, setIsMember] = useState(false);
+
+    const checkMembership = async () => {
+        try {
+            const data = await getSidebarData();
+            const joined = data.joined_rooms.some((r: any) => r.id === Number(roomId));
+            setIsMember(joined);
+        } catch (err) {
+            console.error("Failed to check membership", err);
+        }
+    };
+
+    const handleJoin = async () => {
+        if (!roomId) return;
+        try {
+            await joinRoom(Number(roomId));
+            setIsMember(true);
+            // Optional: Refresh sidebar or other state
+        } catch (err) {
+            console.error("Failed to join room", err);
+        }
+    };
 
     const handleCreatePost = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,6 +92,9 @@ export default function RoomDetails() {
                 const roomsData = await getRooms();
                 const foundRoom = roomsData.find((r: Room) => r.id === Number(roomId));
                 setRoom(foundRoom || null);
+
+                // Check membership
+                await checkMembership();
 
             } catch (error) {
                 console.error("Error fetching room details:", error);
@@ -127,13 +152,25 @@ export default function RoomDetails() {
                                 <p className="text-[9px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[120px] xs:max-w-[200px] sm:max-w-none">{room.description}</p>
                             </div>
                         </div>
-                        {/* Mobile Chat Toggle */}
-                        <button
-                            className="lg:hidden p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all relative"
-                            onClick={() => setIsChatOpen(!isChatOpen)}
-                        >
-                            <MessageSquare className="w-5 h-5" />
-                        </button>
+
+                        <div className="flex items-center gap-4">
+                            {!isMember && (
+                                <button
+                                    onClick={handleJoin}
+                                    className="btn-primary px-6 py-2.5 text-[10px] uppercase tracking-[0.2em]"
+                                >
+                                    Join Room
+                                </button>
+                            )}
+
+                            {/* Mobile Chat Toggle */}
+                            <button
+                                className="lg:hidden p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all relative"
+                                onClick={() => setIsChatOpen(!isChatOpen)}
+                            >
+                                <MessageSquare className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex-1 flex overflow-hidden">
@@ -194,7 +231,7 @@ export default function RoomDetails() {
                             ${isChatOpen ? 'block w-full absolute inset-0 z-20 bg-background' : 'hidden'}
                             lg:relative lg:inset-auto lg:z-auto
                         `}>
-                            {roomId && <RoomChat roomId={Number(roomId)} />}
+                            {roomId && <RoomChat roomId={Number(roomId)} isMember={isMember} />}
                         </div>
                     </div>
                 </main>
