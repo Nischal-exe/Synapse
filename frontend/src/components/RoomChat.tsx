@@ -96,7 +96,7 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
                 setError(err.response.data.detail || "Frequency limit exceeded");
                 setRateLimitTimer(1);
             } else if (err.response && err.response.status === 403) {
-                setError("Please join the room to send messages.");
+                setError("Please join this room first to send messages");
             } else {
                 setError("Failed to send message");
             }
