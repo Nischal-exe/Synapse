@@ -28,6 +28,25 @@ export default function VerifyEmail() {
                     </button>
 
                     <button
+                        onClick={async () => {
+                            if (email) {
+                                const { error } = await import('../supabaseClient').then(m => m.supabase.auth.resend({
+                                    type: 'signup',
+                                    email: email,
+                                    options: {
+                                        emailRedirectTo: `${window.location.origin}/login`
+                                    }
+                                }));
+                                if (error) alert('Error resending email: ' + error.message);
+                                else alert('Verification email resent!');
+                            }
+                        }}
+                        className="w-full py-3 rounded-xl border border-primary/20 bg-primary/5 text-primary text-sm font-bold uppercase tracking-widest hover:bg-primary/10 transition-colors"
+                    >
+                        Resend Email
+                    </button>
+
+                    <button
                         onClick={() => navigate('/login')}
                         className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors"
                     >
