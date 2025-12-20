@@ -93,14 +93,6 @@ export default function RoomDetails() {
                 const foundRoom = roomsData.find((r: Room) => r.id === Number(roomId));
                 setRoom(foundRoom || null);
 
-                // Auto-join the room to enable chat functionality
-                try {
-                    await joinRoom(Number(roomId));
-                } catch (joinError) {
-                    // Silently handle if already joined or other errors
-                    console.log("Room join status:", joinError);
-                }
-
                 // Check membership
                 await checkMembership();
 
