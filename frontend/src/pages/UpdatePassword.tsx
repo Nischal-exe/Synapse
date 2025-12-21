@@ -9,15 +9,64 @@ export default function UpdatePassword() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [sessionVerified, setSessionVerified] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Build-in security check: Supabase sets a session when clicking the email link
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-                setError("Invalid or expired password reset link.");
+        let mounted = true;
+        let timeoutId: ReturnType<typeof setTimeout>;
+
+        // Check for error parameters in the URL hash (common with Supabase magic links)
+        const hash = window.location.hash;
+        if (hash && hash.includes('error=')) {
+            const params = new URLSearchParams(hash.substring(1)); // remove #
+            const errorDesc = params.get('error_description') || params.get('error') || "Invalid or expired link";
+            setError(errorDesc.replace(/\+/g, ' '));
+            return;
+        }
+
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session && mounted) {
+                setSessionVerified(true);
+            }
+        };
+
+        checkSession();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!mounted) return;
+
+            if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+                if (session) {
+                    setSessionVerified(true);
+                    setError(null);
+                    clearTimeout(timeoutId);
+                }
+            } else if (event === 'SIGNED_OUT') {
+                setSessionVerified(false);
+                setError("Session expired. Please request a new password reset link.");
             }
         });
+
+        // Safety timeout
+        timeoutId = setTimeout(() => {
+            if (mounted && !sessionVerified) {
+                supabase.auth.getSession().then(({ data: { session } }) => {
+                    if (!session && mounted) {
+                        setError("Link verification timed out. It may have expired or been used.");
+                    } else if (session && mounted) {
+                        setSessionVerified(true);
+                    }
+                });
+            }
+        }, 4000);
+
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+            clearTimeout(timeoutId);
+        };
     }, []);
 
     // Password validation
@@ -34,6 +83,11 @@ export default function UpdatePassword() {
             return;
         }
 
+        if (!sessionVerified) {
+            setError("Unable to verify secure session. Please try clicking the reset link again.");
+            return;
+        }
+
         setLoading(true);
         try {
             const { error } = await supabase.auth.updateUser({
@@ -43,8 +97,10 @@ export default function UpdatePassword() {
             if (error) throw error;
 
             // Success! Redirect to dashboard or login
+            // Force sign out to require fresh login with new password, or redirect to dashboard
             navigate('/dashboard');
         } catch (err: any) {
+            console.error("Update password error:", err);
             setError(err.message || 'Failed to update password');
         } finally {
             setLoading(false);
@@ -75,68 +131,74 @@ export default function UpdatePassword() {
                         </div>
                     )}
 
-                    <form onSubmit={handleUpdatePassword} className="space-y-8">
-                        <div className="space-y-6">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] ml-1 font-sans">New Password</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                        <Lock className="h-4 w-4 text-foreground/30 group-focus-within:text-primary transition-colors" />
+                    {!sessionVerified && !error ? (
+                        <div className="text-center py-10 animate-pulse text-foreground/50">
+                            Verifying secure link...
+                        </div>
+                    ) : (
+                        <form onSubmit={handleUpdatePassword} className="space-y-8">
+                            <div className="space-y-6">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] ml-1 font-sans">New Password</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                            <Lock className="h-4 w-4 text-foreground/30 group-focus-within:text-primary transition-colors" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            required
+                                            className="block w-full pl-14 pr-5 py-4 bg-primary/5 border border-primary/10 rounded-full text-foreground placeholder-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-sans text-sm"
+                                            placeholder="••••••••"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
                                     </div>
-                                    <input
-                                        type="password"
-                                        required
-                                        className="block w-full pl-14 pr-5 py-4 bg-primary/5 border border-primary/10 rounded-full text-foreground placeholder-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-sans text-sm"
-                                        placeholder="••••••••"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] ml-1 font-sans">Confirm Password</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                            <Lock className="h-4 w-4 text-foreground/30 group-focus-within:text-primary transition-colors" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            required
+                                            className="block w-full pl-14 pr-5 py-4 bg-primary/5 border border-primary/10 rounded-full text-foreground placeholder-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-sans text-sm"
+                                            placeholder="••••••••"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] ml-1 font-sans">Confirm Password</label>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                        <Lock className="h-4 w-4 text-foreground/30 group-focus-within:text-primary transition-colors" />
-                                    </div>
-                                    <input
-                                        type="password"
-                                        required
-                                        className="block w-full pl-14 pr-5 py-4 bg-primary/5 border border-primary/10 rounded-full text-foreground placeholder-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-sans text-sm"
-                                        placeholder="••••••••"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                    />
+
+                            {/* Password Complexity Indicators */}
+                            <div className="space-y-3 bg-primary/5 p-6 rounded-[2rem] border border-primary/10">
+                                <h4 className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] font-sans mb-4">Requirements</h4>
+                                <div className={`flex items-center text-xs font-sans ${isLengthValid ? 'text-primary' : 'text-foreground/30'}`}>
+                                    <CheckCircle2 className={`w-3.5 h-3.5 mr-2 transition-colors ${isLengthValid ? 'text-primary' : 'text-foreground/10'}`} />
+                                    8+ characters
+                                </div>
+                                <div className={`flex items-center text-xs font-sans ${hasNumber ? 'text-primary' : 'text-foreground/30'}`}>
+                                    <CheckCircle2 className={`w-3.5 h-3.5 mr-2 transition-colors ${hasNumber ? 'text-primary' : 'text-foreground/10'}`} />
+                                    At least one number
+                                </div>
+                                <div className={`flex items-center text-xs font-sans ${hasUpper ? 'text-primary' : 'text-foreground/30'}`}>
+                                    <CheckCircle2 className={`w-3.5 h-3.5 mr-2 transition-colors ${hasUpper ? 'text-primary' : 'text-foreground/10'}`} />
+                                    One uppercase letter
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Password Complexity Indicators */}
-                        <div className="space-y-3 bg-primary/5 p-6 rounded-[2rem] border border-primary/10">
-                            <h4 className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] font-sans mb-4">Requirements</h4>
-                            <div className={`flex items-center text-xs font-sans ${isLengthValid ? 'text-primary' : 'text-foreground/30'}`}>
-                                <CheckCircle2 className={`w-3.5 h-3.5 mr-2 transition-colors ${isLengthValid ? 'text-primary' : 'text-foreground/10'}`} />
-                                8+ characters
-                            </div>
-                            <div className={`flex items-center text-xs font-sans ${hasNumber ? 'text-primary' : 'text-foreground/30'}`}>
-                                <CheckCircle2 className={`w-3.5 h-3.5 mr-2 transition-colors ${hasNumber ? 'text-primary' : 'text-foreground/10'}`} />
-                                At least one number
-                            </div>
-                            <div className={`flex items-center text-xs font-sans ${hasUpper ? 'text-primary' : 'text-foreground/30'}`}>
-                                <CheckCircle2 className={`w-3.5 h-3.5 mr-2 transition-colors ${hasUpper ? 'text-primary' : 'text-foreground/10'}`} />
-                                One uppercase letter
-                            </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading || !hasNumber || !hasUpper || !isLengthValid}
-                            className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 mt-4 disabled:opacity-50 disabled:cursor-not-allowed group"
-                        >
-                            {loading ? "Updating..." : "Update Password"}
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                    </form>
+                            <button
+                                type="submit"
+                                disabled={loading || !hasNumber || !hasUpper || !isLengthValid}
+                                className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 mt-4 disabled:opacity-50 disabled:cursor-not-allowed group"
+                            >
+                                {loading ? "Updating..." : "Update Password"}
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </form>
+                    )}
                 </div>
             </div>
         </div>
