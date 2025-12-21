@@ -48,7 +48,7 @@ export default function ForgotPassword() {
                             <img className="h-12 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
                         </Link>
                         <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Reset Password</h2>
-                        <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold px-4">Secure your link via transmission.</p>
+                        <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold px-4">Enter your email to reset your password.</p>
                     </div>
 
                     {error && (
@@ -60,15 +60,15 @@ export default function ForgotPassword() {
                     {success ? (
                         <div className="text-center bg-primary/5 border border-primary/10 p-10 rounded-[2.5rem] animate-fade-in">
                             <CheckCircle2 className="w-16 h-16 text-primary mx-auto mb-8 animate-pulse" />
-                            <h3 className="text-2xl font-bold text-foreground mb-4">Transmission Sent</h3>
+                            <h3 className="text-2xl font-bold text-foreground mb-4">Email Sent</h3>
                             <p className="text-foreground/60 text-sm font-sans leading-relaxed mb-10">
-                                A synchronization link has been dispatched to <br /> <strong>{email}</strong>
+                                A password reset link has been sent to <br /> <strong>{email}</strong>
                             </p>
                             <button
                                 onClick={() => navigate('/login')}
                                 className="text-primary font-black uppercase tracking-widest text-[10px] font-sans hover:underline underline-offset-8 transition-all"
                             >
-                                Return to Entry Point
+                                Return to Login
                             </button>
                         </div>
                     ) : (
@@ -94,7 +94,7 @@ export default function ForgotPassword() {
                                 disabled={loading}
                                 className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 mt-4 disabled:opacity-50 disabled:cursor-not-allowed group"
                             >
-                                {loading ? "Dispatching..." : "Send Reset Link"}
+                                {loading ? "Sending..." : "Send Reset Link"}
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </button>
                         </form>
