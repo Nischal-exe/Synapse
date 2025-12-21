@@ -39,10 +39,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         // Immediate synchronous check for hash before Supabase swallows it
         const hash = window.location.hash;
-        if (hash && hash.includes('type=recovery')) {
+        if (hash && hash.includes('type=recovery') && !window.location.pathname.includes('/update-password')) {
             console.log("Recovery mode detected via hash, redirecting...");
             navigate('/update-password');
-            // Do not return here, let session logic proceed so we are authenticated
         }
 
         // Check active session
