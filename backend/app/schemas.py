@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
 
@@ -107,12 +107,6 @@ class PasswordResetConfirm(BaseModel):
 class ChatMessageBase(BaseModel):
     content: str
     room_id: int
-
-    @validator('content')
-    def content_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('Message content cannot be empty')
-        return v
 
 class ChatMessageCreate(ChatMessageBase):
     pass
