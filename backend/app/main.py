@@ -98,6 +98,13 @@ app.include_router(likes.router)
 app.include_router(comments.router)
 # app.include_router(activity.router)
 
+@app.get("/system/reset-db-confirmed")
+def reset_database_dangerous():
+    # Dangerous! Use only for resetting
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    return {"status": "Database reset complete. All users deleted."}
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to Synapse API"}
