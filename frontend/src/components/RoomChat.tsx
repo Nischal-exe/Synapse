@@ -27,14 +27,24 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
     const [error, setError] = useState<string | null>(null);
     const [rateLimitTimer, setRateLimitTimer] = useState<number | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const hasInitialScrolled = useRef(false);
+
+    // Reset initial scroll when room changes
+    useEffect(() => {
+        hasInitialScrolled.current = false;
+    }, [roomId]);
 
     // Scroll to bottom
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    // Auto-scroll only on initial load
     useEffect(() => {
-        scrollToBottom();
+        if (!hasInitialScrolled.current && messages.length > 0) {
+            scrollToBottom();
+            hasInitialScrolled.current = true;
+        }
     }, [messages]);
 
     // Poll for messages
@@ -90,6 +100,8 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
             const response = await api.get(`/rooms/${roomId}/messages`);
             setMessages(response.data);
             setRateLimitTimer(1);
+            // Scroll to bottom after sending
+            setTimeout(scrollToBottom, 100);
 
         } catch (err: any) {
             if (err.response && err.response.status === 429) {
