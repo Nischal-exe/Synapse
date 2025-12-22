@@ -23,6 +23,16 @@ with engine.connect() as connection:
              # Also make password nullable
              migration_txn.execute(text("ALTER TABLE users ALTER COLUMN hashed_password DROP NOT NULL;"))
         print("Migration complete.")
+
+    try:
+        # Check if date_of_birth column exists
+        connection.execute(text("SELECT date_of_birth FROM users LIMIT 1"))
+    except ProgrammingError:
+        connection.rollback()
+        print("Migrating DB: Adding date_of_birth column to users table...")
+        with engine.begin() as migration_txn:
+             migration_txn.execute(text("ALTER TABLE users ADD COLUMN date_of_birth VARCHAR;"))
+        print("date_of_birth Migration complete.")
         
     # Seed Rooms if empty
     try:
