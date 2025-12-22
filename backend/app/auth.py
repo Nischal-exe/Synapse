@@ -77,22 +77,43 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
                 
             full_name = user_metadata.get("full_name")
             
-            new_user = crud.models.User(
-                username=username,
-                email=email,
-                full_name=full_name,
-                supabase_id=supabase_uid,
-                is_verified=True, # Confirmed by token existence
-                hashed_password="managed_by_supabase"
-            )
-            try:
-                db.add(new_user)
-                db.commit()
-                db.refresh(new_user)
-                user = new_user
-            except Exception as exc:
-                print(f"Auto-provisioning failed: {exc}")
-                raise HTTPException(status_code=400, detail="User creation failed (likely duplicate username).")
+            date_of_birth = user_metadata.get("date_of_birth")
+
+            # Attempt creation with retries for username uniqueness
+            import random
+            for attempt in range(3):
+                try:
+                    new_user = crud.models.User(
+                        username=username,
+                        email=email,
+                        full_name=full_name,
+                        date_of_birth=date_of_birth,
+                        supabase_id=supabase_uid,
+                        is_verified=True, # Confirmed by token existence
+                        hashed_password="managed_by_supabase"
+                    )
+                    db.add(new_user)
+                    db.commit()
+                    db.refresh(new_user)
+                    user = new_user
+                    break # Success
+                except Exception as exc:
+                    db.rollback()
+                    # If this was possibly a race condition on EMAIL, check if user exists now
+                    existing_user = db.query(crud.models.User).filter(crud.models.User.email == email).first()
+                    if existing_user:
+                        user = existing_user
+                        break
+                    
+                    # If it was likely a USERNAME collision, modify username and retry
+                    if attempt < 2:
+                        base_name = user_metadata.get("username", email.split("@")[0])
+                        username = f"{base_name}{random.randint(1000, 9999)}"
+                        continue
+                    
+                    # If all attempts fail
+                    print(f"Auto-provisioning failed after retries: {exc}")
+                    raise HTTPException(status_code=400, detail="User creation failed (likely duplicate username).")
 
     if user is None:
         raise HTTPException(status_code=401, detail="User profile could not be loaded.")
