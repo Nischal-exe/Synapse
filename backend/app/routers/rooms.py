@@ -72,15 +72,11 @@ def get_messages(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    try:
-        messages = db.query(models.ChatMessage).filter(
-            models.ChatMessage.room_id == room_id
-        ).order_by(models.ChatMessage.created_at.desc()).limit(limit).all()
-        
-        return messages[::-1] # Return in chronological order (oldest first) for chat UI
-    except Exception as e:
-        print(f"Error fetching messages: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    messages = db.query(models.ChatMessage).filter(
+        models.ChatMessage.room_id == room_id
+    ).order_by(models.ChatMessage.created_at.desc()).limit(limit).all()
+    
+    return messages[::-1] # Return in chronological order (oldest first) for chat UI
 
 @router.post("/{room_id}/messages", response_model=schemas.ChatMessage)
 def send_message(
@@ -89,40 +85,34 @@ def send_message(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth_utils.get_current_user)
 ):
-    try:
-        # 1. Verify membership
-        is_member = db.query(models.RoomMember).filter(
-            models.RoomMember.user_id == current_user.id,
-            models.RoomMember.room_id == room_id
-        ).first()
-        if not is_member:
-            raise HTTPException(status_code=403, detail="Must join room to send messages")
+    # 1. Verify membership
+    is_member = db.query(models.RoomMember).filter(
+        models.RoomMember.user_id == current_user.id,
+        models.RoomMember.room_id == room_id
+    ).first()
+    if not is_member:
+        raise HTTPException(status_code=403, detail="Must join room to send messages")
 
-        # 2. Rate Limiting (1 second)
-        rate_limit_key = f"chat_rate:{current_user.id}:{room_id}"
-        if redis_client.exists(rate_limit_key):
-            ttl = redis_client.ttl(rate_limit_key)
-            raise HTTPException(
-                status_code=429, 
-                detail=f"Please wait {ttl}s before sending another message"
-            )
-
-        # 3. Create Message
-        new_message = models.ChatMessage(
-            content=message.content,
-            room_id=room_id,
-            user_id=current_user.id
+    # 2. Rate Limiting (1 second)
+    rate_limit_key = f"chat_rate:{current_user.id}:{room_id}"
+    if redis_client.exists(rate_limit_key):
+        ttl = redis_client.ttl(rate_limit_key)
+        raise HTTPException(
+            status_code=429, 
+            detail=f"Please wait {ttl}s before sending another message"
         )
-        db.add(new_message)
-        db.commit()
-        db.refresh(new_message)
 
-        # 4. Set Rate Limit
-        redis_client.setex(rate_limit_key, 1, "1") # 1 second expiry
+    # 3. Create Message
+    new_message = models.ChatMessage(
+        content=message.content,
+        room_id=room_id,
+        user_id=current_user.id
+    )
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
 
-        return new_message
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        print(f"Error sending message: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+    # 4. Set Rate Limit
+    redis_client.setex(rate_limit_key, 1, "1") # 1 second expiry
+
+    return new_message
