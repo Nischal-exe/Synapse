@@ -167,3 +167,15 @@ class PermissionChecker:
                 detail=f"Missing required permission: {self.required_permission}"
             )
         return current_user
+
+def get_current_moderator(current_user: models.User = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    """
+    Dependency to check if the user is a moderator or admin.
+    Checks for 'delete_any_post' permission which is assigned to admins.
+    """
+    if not has_permission(current_user.id, "delete_any_post", db):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Moderator privileges required"
+        )
+    return current_user

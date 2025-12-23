@@ -9,6 +9,7 @@ import UpdatePassword from './pages/UpdatePassword.tsx';
 import VerifyEmail from './pages/VerifyEmail.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import RoomDetails from './pages/RoomDetails.tsx';
+import ModeratorDashboard from './pages/ModeratorDashboard.tsx';
 import './index.css';
 
 import LoadingDots from './components/LoadingDots';
@@ -57,6 +58,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <RoomDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/moderator"
+              element={
+                <ProtectedRoute>
+                  <ModeratorDashboard />
                 </ProtectedRoute>
               }
             />

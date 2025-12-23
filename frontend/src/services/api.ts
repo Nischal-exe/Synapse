@@ -104,8 +104,7 @@ export const getModeratorPosts = async () => {
 };
 
 export const deletePostAsModerator = async (postId: number) => {
-    // The backend endpoint for admin delete is just /posts/{id}
-    const response = await api.delete(`/posts/${postId}`);
+    const response = await api.delete(`/moderator/posts/${postId}`);
     return response.data;
 };
 
