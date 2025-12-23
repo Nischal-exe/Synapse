@@ -23,6 +23,7 @@ class UserLogin(BaseModel):
 class User(UserBase):
     id: int
     is_active: bool = True
+    role: Optional[str] = None # Include role in response
 
     class Config:
         from_attributes = True
