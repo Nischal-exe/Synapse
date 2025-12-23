@@ -13,10 +13,18 @@ All endpoints (except the root `/`) require a **Bearer Token** in the header.
 ---
 
 ## 👤 Users
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/users/me` | `GET` | Returns the profile of the logged-in user. |
-| `/users/me/sidebar` | `GET` | Returns a list of rooms the user has joined. |
+| Endpoint | Method | Description | Response |
+| :--- | :--- | :--- | :--- |
+| `/users/me` | `GET` | Returns the profile of the logged-in user. | `{"id": int, "username": "str", "role": "str", ...}` |
+| `/users/me/sidebar` | `GET` | Returns a list of rooms the user has joined. | `{"joined_rooms": [...]}` |
+
+---
+
+## 🛡️ Moderator (Admin/Mod Only)
+| Endpoint | Method | Role | Description |
+| :--- | :--- | :--- | :--- |
+| `/moderator/posts` | `GET` | Mod/Admin | **Moderator Queue**: Get list of all recent posts. |
+| `/moderator/posts/{id}` | `DELETE` | Mod/Admin | **Moderator Action**: Delete any post by ID. |
 
 ---
 
@@ -39,7 +47,8 @@ All endpoints (except the root `/`) require a **Bearer Token** in the header.
 | `/posts/` | `GET` | Any | Get all posts. | None (Query param: `room_id`) |
 | `/posts/` | `POST` | Any | Create a post. | `{"title": "string", "content": "string", "room_id": int}` |
 | `/posts/{id}` | `GET` | Any | Get post details. | None |
-| `/posts/{id}` | `DELETE` | **Admin** | Delete a post. | None |
+| `/posts/{id}` | `DELETE` | **Admin** | Delete a post (Legacy/Admin). | None |
+| `/posts/comments/{id}` | `DELETE` | **Admin** | Delete a comment. | None |
 
 ---
 
@@ -48,7 +57,6 @@ All endpoints (except the root `/`) require a **Bearer Token** in the header.
 | :--- | :--- | :--- | :--- | :--- |
 | `/posts/{post_id}/comments` | `GET` | Any | Get post comments. | None |
 | `/posts/{post_id}/comments` | `POST` | Any | Post a comment. | `{"content": "string", "parent_id": int/null}` |
-| `/posts/comments/{id}` | `DELETE` | **Admin** | Delete a comment. | None |
 
 ---
 
