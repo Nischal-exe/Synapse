@@ -37,9 +37,10 @@ class Room(Base):
     name = Column(String, unique=True, index=True)
     description = Column(String)
 
-    posts = relationship("Post", back_populates="room")
+    posts = relationship("Post", back_populates="room", cascade="all, delete-orphan")
     members = relationship("User", secondary="room_members", back_populates="joined_rooms")
-    messages = relationship("ChatMessage", back_populates="room")
+    messages = relationship("ChatMessage", back_populates="room", cascade="all, delete-orphan")
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -103,3 +104,34 @@ class ChatMessage(Base):
 
     owner = relationship("User", back_populates="messages")
     room = relationship("Room", back_populates="messages")
+
+class Roles(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    role_name = Column(String, unique=True, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Permission(Base):
+    __tablename__ = "permissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    permission_name = Column(String, unique=True, index=True)
+    description = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class RolePermissions(Base):
+    __tablename__ = "role_permissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    role_id = Column(Integer, ForeignKey("roles.id"))
+    permission_id = Column(Integer, ForeignKey("permissions.id"))
+
+class UserRoles(Base):
+    __tablename__ = "user_roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    role_id = Column(Integer, ForeignKey("roles.id"))

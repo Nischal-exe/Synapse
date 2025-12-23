@@ -25,8 +25,9 @@ def create_comment(
     post_id: int,
     comment: schemas.CommentCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth_utils.get_current_user)
+    current_user: models.User = Depends(auth_utils.PermissionChecker("create_comment"))
 ):
+
     # Ensure post exists
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
@@ -42,3 +43,16 @@ def create_comment(
     db.commit()
     db.refresh(new_comment)
     return new_comment
+@router.delete("/comments/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.PermissionChecker("delete_any_comment"))
+):
+    comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    
+    db.delete(comment)
+    db.commit()
+    return None
