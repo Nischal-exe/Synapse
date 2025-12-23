@@ -9,6 +9,7 @@ interface User {
     email: string;
     full_name: string;
     supabase_id?: string;
+    role?: string; // Add role
 }
 
 interface AuthContextType {

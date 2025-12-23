@@ -96,4 +96,17 @@ export const joinRoom = async (roomId: number) => {
     return response.data;
 };
 
+// Moderator APIs
+export const getModeratorPosts = async () => {
+    // Assuming backend endpoint is /posts/moderator/queue or similar, but checking requirement it says /moderator/posts
+    const response = await api.get('/moderator/posts');
+    return response.data;
+};
+
+export const deletePostAsModerator = async (postId: number) => {
+    // The backend endpoint for admin delete is just /posts/{id}
+    const response = await api.delete(`/posts/${postId}`);
+    return response.data;
+};
+
 export default api;
