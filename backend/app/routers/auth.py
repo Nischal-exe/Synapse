@@ -64,9 +64,18 @@ def sync_user_profile(
     
     try:
         db.add(new_user)
+        db.flush() # Get ID
+
+        # Assign 'normal_user' role
+        normal_role = db.query(crud.models.Roles).filter(crud.models.Roles.role_name == "normal_user").first()
+        if normal_role:
+            user_role = crud.models.UserRoles(user_id=new_user.id, role_id=normal_role.id)
+            db.add(user_role)
+
         db.commit()
         db.refresh(new_user)
         return new_user
+
     except Exception as e:
         print(f"Error creating user: {e}")
         db.rollback()

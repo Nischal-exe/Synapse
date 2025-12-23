@@ -14,8 +14,9 @@ get_db = database.get_db
 def toggle_like(
     post_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth_utils.get_current_user)
+    current_user: models.User = Depends(auth_utils.PermissionChecker("like_post"))
 ):
+
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")

@@ -26,7 +26,7 @@ def read_rooms(
 def create_room(
     room: schemas.RoomCreate, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth_utils.get_current_user)
+    current_user: models.User = Depends(auth_utils.PermissionChecker("manage_rooms"))
 ):
     # Only allow if room doesn't exist
     db_room = db.query(models.Room).filter(models.Room.name == room.name).first()
@@ -83,8 +83,13 @@ def send_message(
     room_id: int,
     message: schemas.ChatMessageCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth_utils.get_current_user)
+    current_user: models.User = Depends(auth_utils.PermissionChecker("chat"))
 ):
+
+    # 0. Validate content
+    if not message.content or not message.content.strip():
+        raise HTTPException(status_code=400, detail="Message content cannot be empty")
+
     # 1. Verify membership
     is_member = db.query(models.RoomMember).filter(
         models.RoomMember.user_id == current_user.id,
@@ -104,7 +109,7 @@ def send_message(
 
     # 3. Create Message
     new_message = models.ChatMessage(
-        content=message.content,
+        content=message.content.strip(),
         room_id=room_id,
         user_id=current_user.id
     )
@@ -116,3 +121,31 @@ def send_message(
     redis_client.setex(rate_limit_key, 1, "1") # 1 second expiry
 
     return new_message
+@router.delete("/messages/{message_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_message(
+    message_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.PermissionChecker("delete_any_message"))
+):
+    message = db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    db.delete(message)
+    db.commit()
+    return None
+@router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_room(
+    room_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth_utils.PermissionChecker("manage_rooms"))
+):
+    room = db.query(models.Room).filter(models.Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    # Optional: Delete related members/messages if not handled by DB CASCADE
+    # For now, let's assume standard SQLAlchemy session delete
+    db.delete(room)
+    db.commit()
+    return None
