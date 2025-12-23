@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .database import engine, Base
-from .routers import auth, rooms, users, posts, likes, comments # , activity
+from .routers import auth, rooms, users, posts, likes, comments, moderator # , activity
 from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 
@@ -144,6 +144,7 @@ app.include_router(posts.router)
 app.include_router(users.router)
 app.include_router(likes.router)
 app.include_router(comments.router)
+app.include_router(moderator.router)
 
 @app.get("/")
 def read_root():
