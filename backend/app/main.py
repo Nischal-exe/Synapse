@@ -29,54 +29,58 @@ def run_migrations():
                  migration_txn.execute(text("ALTER TABLE users ADD COLUMN date_of_birth VARCHAR;"))
             print("date_of_birth Migration complete.")
             
-    # Seed Roles and Permissions if empty
+    # Seed Roles and Permissions (Idempotent Check)
     try:
-        with engine.connect() as connection:
-            result = connection.execute(text("SELECT count(*) FROM roles"))
-            count = result.scalar()
+        print("Verifying roles and permissions...")
+        with engine.begin() as seed_txn:
+             # 1. Roles
+            seed_txn.execute(text("INSERT INTO roles (role_name) VALUES ('admin'), ('normal_user') ON CONFLICT (role_name) DO NOTHING"))
             
-        if count == 0:
-            print("Seeding roles and permissions...")
-            with engine.begin() as seed_txn:
-                seed_txn.execute(text("INSERT INTO roles (role_name) VALUES ('admin'), ('normal_user')"))
-                
-                permissions = [
-                    ('create_post', 'Can create new posts'),
-                    ('like_post', 'Can like and unlike posts'),
-                    ('chat', 'Can send messages in chat rooms'),
-                    ('create_comment', 'Can reply to questions/posts'),
-                    ('delete_any_post', 'Admin: Can delete any post'),
-                    ('delete_any_comment', 'Admin: Can delete any comment'),
-                    ('delete_any_message', 'Admin: Can delete any chat message'),
-                    ('manage_rooms', 'Admin: Can create/edit/delete rooms'),
-                    ('manage_users', 'Admin: Can manage user accounts')
+            # 2. Permissions
+            permissions_list = [
+                ('create_post', 'Can create new posts'),
+                ('like_post', 'Can like and unlike posts'),
+                ('chat', 'Can send messages in chat rooms'),
+                ('create_comment', 'Can reply to questions/posts'),
+                ('delete_any_post', 'Admin: Can delete any post'),
+                ('delete_any_comment', 'Admin: Can delete any comment'),
+                ('delete_any_message', 'Admin: Can delete any chat message'),
+                ('manage_rooms', 'Admin: Can create/edit/delete rooms'),
+                ('manage_users', 'Admin: Can manage user accounts')
+            ]
+            for name, desc in permissions_list:
+                seed_txn.execute(
+                    text("INSERT INTO permissions (permission_name, description) VALUES (:name, :desc) ON CONFLICT (permission_name) DO NOTHING"),
+                    {"name": name, "desc": desc}
+                )
+            
+            # 3. Get IDs
+            roles = seed_txn.execute(text("SELECT id, role_name FROM roles")).fetchall()
+            perms = seed_txn.execute(text("SELECT id, permission_name FROM permissions")).fetchall()
+            
+            role_ids = {r[1]: r[0] for r in roles}
+            perm_ids = {p[1]: p[0] for p in perms}
+            
+            # 4. Assign Permissions (Idempotent)
+            def assign_perm(r_name, p_name):
+                r_id = role_ids.get(r_name)
+                p_id = perm_ids.get(p_name)
+                if r_id and p_id:
+                     seed_txn.execute(
+                        text("INSERT INTO role_permissions (role_id, permission_id) SELECT :r_id, :p_id WHERE NOT EXISTS (SELECT 1 FROM role_permissions WHERE role_id = :r_id AND permission_id = :p_id)"),
+                        {"r_id": r_id, "p_id": p_id}
+                    )
 
-                ]
-                for name, desc in permissions:
-                    seed_txn.execute(
-                        text("INSERT INTO permissions (permission_name, description) VALUES (:name, :desc)"),
-                        {"name": name, "desc": desc}
-                    )
-                
-                roles = seed_txn.execute(text("SELECT id, role_name FROM roles")).fetchall()
-                perms = seed_txn.execute(text("SELECT id, permission_name FROM permissions")).fetchall()
-                
-                role_ids = {r[1]: r[0] for r in roles}
-                perm_ids = {p[1]: p[0] for p in perms}
-                
-                for p_id in perm_ids.values():
-                    seed_txn.execute(
-                        text("INSERT INTO role_permissions (role_id, permission_id) VALUES (:r_id, :p_id)"),
-                        {"r_id": role_ids['admin'], "p_id": p_id}
-                    )
-                
-                user_perms = ['create_post', 'like_post', 'chat', 'create_comment']
-                for p_name in user_perms:
-                    seed_txn.execute(
-                        text("INSERT INTO role_permissions (role_id, permission_id) VALUES (:r_id, :p_id)"),
-                        {"r_id": role_ids['normal_user'], "p_id": perm_ids[p_name]}
-                    )
-            print("Roles and permissions seeded successfully.")
+            # Admin gets ALL
+            for p_name in perm_ids.keys():
+                assign_perm('admin', p_name)
+            
+            # Normal User gets specific set
+            user_perms = ['create_post', 'like_post', 'chat', 'create_comment']
+            for p_name in user_perms:
+                 assign_perm('normal_user', p_name)
+
+        print("Roles and permissions verification complete.")
     except Exception as e:
         print(f"Error seeding roles/permissions: {e}")
 
