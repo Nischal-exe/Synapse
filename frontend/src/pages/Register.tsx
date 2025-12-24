@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useToast } from '../context/ToastContext';
 import logo from '../assets/logo.png';
-import { User, Mail, Lock, Calendar, UserCircle } from 'lucide-react';
+import { User, Mail, Lock, Calendar, UserCircle, Loader2 } from 'lucide-react';
 
 export default function Register() {
     const [username, setUsername] = useState('');
@@ -11,11 +12,23 @@ export default function Register() {
     const [fullName, setFullName] = useState('');
     const [dob, setDob] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const { showToast } = useToast();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setLoading(true);
+
+        // Client-side validation
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long');
+            showToast('Password must be at least 6 characters long', 'error');
+            setLoading(false);
+            return;
+        }
+
         try {
             const { error } = await supabase.auth.signUp({
                 email,
@@ -32,9 +45,14 @@ export default function Register() {
 
             if (error) throw error;
 
+            showToast('Registration successful! Please check your email to verify.', 'success');
             navigate('/verify', { state: { email } });
         } catch (err: any) {
-            setError(err.message || 'Registration failed');
+            const errorMsg = err.message || 'Registration failed. Please try again.';
+            setError(errorMsg);
+            showToast(errorMsg, 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -150,9 +168,18 @@ export default function Register() {
 
                     <button
                         type="submit"
-                        className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 mt-4"
+                        disabled={loading}
+                        className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label="Create your account"
                     >
-                        Register
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Creating account...
+                            </>
+                        ) : (
+                            'Register'
+                        )}
                     </button>
                 </form>
 

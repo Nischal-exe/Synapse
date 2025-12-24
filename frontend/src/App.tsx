@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider.tsx';
+import { ToastProvider } from './context/ToastContext.tsx';
 import { useAuth } from './hooks/useAuth';
 import Home from './pages/Home.tsx';
 import Login from './pages/Login.tsx';
@@ -8,10 +9,12 @@ import ForgotPassword from './pages/ForgotPassword.tsx';
 import UpdatePassword from './pages/UpdatePassword.tsx';
 import VerifyEmail from './pages/VerifyEmail.tsx';
 import Dashboard from './pages/Dashboard.tsx';
+import AdminDashboard from './pages/AdminDashboard.tsx';
 import RoomDetails from './pages/RoomDetails.tsx';
 import './index.css';
 
 import LoadingDots from './components/LoadingDots';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -34,37 +37,49 @@ import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/update-password" element={<UpdatePassword />} />
-            <Route path="/verify" element={<VerifyEmail />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/room/:roomId"
-              element={
-                <ProtectedRoute>
-                  <RoomDetails />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<div className="min-h-screen flex items-center justify-center text-red-500 font-bold text-2xl">404 - Page Not Found (React)</div>} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <ToastProvider>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/update-password" element={<UpdatePassword />} />
+                <Route path="/verify" element={<VerifyEmail />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/room/:roomId"
+                  element={
+                    <ProtectedRoute>
+                      <RoomDetails />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<div className="min-h-screen flex items-center justify-center text-red-500 font-bold text-2xl">404 - Page Not Found (React)</div>} />
+              </Routes>
+            </ToastProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

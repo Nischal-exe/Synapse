@@ -60,7 +60,7 @@ export default function Home() {
                         Highlight quality, simplicity, <br className="hidden md:block" /> and artisan approach.
                     </h2>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 md:gap-16">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-12 md:gap-16">
                         {[
                             { name: 'Pure Focus', desc: 'Zero distractions for your deep work sessions.', img: concentrateImg },
                             { name: 'Live Sync', desc: 'Real-time collaboration across all your devices.', img: syncImg },

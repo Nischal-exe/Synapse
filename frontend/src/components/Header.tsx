@@ -24,6 +24,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         <button
                             onClick={onMenuClick}
                             className="lg:hidden p-3 rounded-full hover:bg-primary/5 text-foreground/40 transition-all duration-300"
+                            aria-label="Open navigation menu"
                         >
                             <Menu className="w-6 h-6" />
                         </button>
@@ -58,6 +59,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                                     <button
                                         onClick={handleLogout}
                                         className="p-3 rounded-full text-foreground/40 hover:text-destructive hover:bg-destructive/5 transition-all duration-300"
+                                        aria-label="Logout from your account"
                                     >
                                         <LogOut className="w-5 h-5" />
                                     </button>

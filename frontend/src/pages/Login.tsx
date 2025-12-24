@@ -1,19 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { useToast } from '../context/ToastContext';
 import logo from '../assets/logo.png';
 import { Link } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react'; // Changed User to Mail
+import { Mail, Lock, Loader2 } from 'lucide-react';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const { showToast } = useToast();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setLoading(true);
+
         try {
             const { error } = await supabase.auth.signInWithPassword({
                 email,
@@ -22,9 +27,14 @@ export default function Login() {
 
             if (error) throw error;
 
+            showToast('Login successful! Welcome back.', 'success');
             navigate('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Login failed');
+            const errorMsg = err.message || 'Login failed. Please try again.';
+            setError(errorMsg);
+            showToast(errorMsg, 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -95,9 +105,18 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3"
+                        disabled={loading}
+                        className="btn-primary w-full py-5 text-sm uppercase tracking-[0.3em] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label="Login to your account"
                     >
-                        Login
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Logging in...
+                            </>
+                        ) : (
+                            'Login'
+                        )}
                     </button>
                 </form>
 

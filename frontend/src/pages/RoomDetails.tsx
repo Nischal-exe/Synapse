@@ -5,6 +5,7 @@ import LoadingDots from '../components/LoadingDots';
 import PostItem from '../components/PostItem';
 import RoomChat from '../components/RoomChat';
 import { getPosts, getRooms, createPost, getSidebarData, joinRoom } from '../services/api';
+import { useToast } from '../context/ToastContext';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
 import Header from '../components/Header';
 
@@ -30,6 +31,7 @@ interface Room {
 export default function RoomDetails() {
     const { roomId } = useParams<{ roomId: string }>();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [posts, setPosts] = useState<Post[]>([]);
     const [room, setRoom] = useState<Room | null>(null);
     const [loading, setLoading] = useState(true);
@@ -54,9 +56,10 @@ export default function RoomDetails() {
         try {
             await joinRoom(Number(roomId));
             setIsMember(true);
-            // Optional: Refresh sidebar or other state
+            showToast('Successfully joined the room!', 'success');
         } catch (err) {
             console.error("Failed to join room", err);
+            showToast('Failed to join room. Please try again.', 'error');
         }
     };
 
@@ -71,11 +74,13 @@ export default function RoomDetails() {
             });
             setNewPostTitle('');
             setNewPostContent('');
+            showToast('Post created successfully!', 'success');
             // Refresh posts
             const postsData = await getPosts(Number(roomId));
             setPosts(postsData);
         } catch (error) {
             console.error("Failed to create post", error);
+            showToast('Failed to create post. Please try again.', 'error');
         }
     };
 
@@ -138,7 +143,7 @@ export default function RoomDetails() {
                 <Sidebar key={isSidebarOpen ? 'open' : 'closed'} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
                 <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-                    {/* Background acccent */}
+                    {/* Background accent */}
                     <div className="absolute top-0 left-0 w-full h-96 bg-primary/5 pointer-events-none" />
 
                     {/* Room Toolbar */}
@@ -149,7 +154,7 @@ export default function RoomDetails() {
                             </button>
                             <div>
                                 <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">{room.name}</h1>
-                                <p className="text-[9px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[120px] xs:max-w-[200px] sm:max-w-none">{room.description}</p>
+                                <p className="text-[9px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[180px] sm:max-w-[300px] md:max-w-none">{room.description}</p>
                             </div>
                         </div>
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle, CheckCircle, ArrowRight, Compass } from 'lucide-react';
 import LoadingDots from '../components/LoadingDots';
 import { getRooms, joinRoom, getSidebarData } from '../services/api';
+import { useToast } from '../context/ToastContext';
 import Sidebar from '../components/Sidebar.tsx';
 import Header from '../components/Header';
 
@@ -19,6 +20,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [sidebarKey, setSidebarKey] = useState(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { showToast } = useToast();
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -37,12 +39,13 @@ export default function Dashboard() {
                 setRooms(enhancedRooms);
             } catch (error) {
                 console.error("Failed to fetch rooms:", error);
+                showToast('Failed to load rooms. Please try again.', 'error');
             } finally {
                 setLoading(false);
             }
         };
         fetchRooms();
-    }, []);
+    }, [showToast]);
 
     const handleRoomClick = (roomId: number) => {
         navigate(`/room/${roomId}`);
@@ -54,11 +57,14 @@ export default function Dashboard() {
             const res = await joinRoom(roomId);
             setRooms(rooms.map(r => r.id === roomId ? { ...r, is_joined: res.joined } : r));
             if (res.joined) {
+                const roomName = rooms.find(r => r.id === roomId)?.name;
+                showToast(`Successfully joined ${roomName}!`, 'success');
                 navigate(`/room/${roomId}`);
             }
             setSidebarKey(prev => prev + 1); // Refresh sidebar
         } catch (error) {
             console.error("Failed to join room:", error);
+            showToast('Failed to join room. Please try again.', 'error');
         }
     };
 

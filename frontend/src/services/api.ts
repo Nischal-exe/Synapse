@@ -96,4 +96,83 @@ export const joinRoom = async (roomId: number) => {
     return response.data;
 };
 
+// Admin & Moderator APIs
+export const getModeratorPosts = async () => {
+    const response = await api.get('/moderator/posts');
+    return response.data;
+};
+
+export const deletePost = async (postId: number) => {
+    const response = await api.delete(`/posts/${postId}`);
+    return response.data;
+};
+
+export const deleteRoom = async (roomId: number) => {
+    const response = await api.delete(`/rooms/${roomId}`);
+    return response.data;
+};
+
+export const createRoom = async (roomData: { name: string; description: string }) => {
+    const response = await api.post('/rooms/', roomData);
+    return response.data;
+};
+
+export const deleteMessage = async (messageId: number) => {
+    const response = await api.delete(`/rooms/messages/${messageId}`);
+    return response.data;
+};
+
+export const deleteComment = async (commentId: number) => {
+    const response = await api.delete(`/posts/comments/${commentId}`);
+    return response.data;
+};
+
+// Helper functions to get all comments and messages for admin
+export const getAllComments = async () => {
+    // First get all posts, then get comments for each
+    const posts = await getModeratorPosts();
+    const allComments = [];
+
+    for (const post of posts) {
+        try {
+            const comments = await getComments(post.id);
+            // Add post info to each comment for context
+            const commentsWithPostInfo = comments.map((comment: any) => ({
+                ...comment,
+                post_title: post.title,
+                post_id: post.id
+            }));
+            allComments.push(...commentsWithPostInfo);
+        } catch (error) {
+            console.error(`Failed to fetch comments for post ${post.id}`, error);
+        }
+    }
+
+    return allComments;
+};
+
+export const getAllMessages = async () => {
+    // First get all rooms, then get messages for each
+    const rooms = await getRooms();
+    const allMessages = [];
+
+    for (const room of rooms) {
+        try {
+            const response = await api.get(`/rooms/${room.id}/messages`);
+            const messages = response.data;
+            // Add room info to each message for context
+            const messagesWithRoomInfo = messages.map((message: any) => ({
+                ...message,
+                room_name: room.name,
+                room_id: room.id
+            }));
+            allMessages.push(...messagesWithRoomInfo);
+        } catch (error) {
+            console.error(`Failed to fetch messages for room ${room.id}`, error);
+        }
+    }
+
+    return allMessages;
+};
+
 export default api;
