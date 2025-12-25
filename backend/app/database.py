@@ -15,6 +15,7 @@ if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgres://")
 if SQLALCHEMY_DATABASE_URL and "sslmode" not in SQLALCHEMY_DATABASE_URL and "localhost" not in SQLALCHEMY_DATABASE_URL and "sqlite" not in SQLALCHEMY_DATABASE_URL:
     SQLALCHEMY_DATABASE_URL += "?sslmode=require"
 
+connect_args = {}
 if SQLALCHEMY_DATABASE_URL and "sqlite" in SQLALCHEMY_DATABASE_URL:
     print(f"Database Config: Using SQLite")
     connect_args = {"check_same_thread": False}
