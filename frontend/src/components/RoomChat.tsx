@@ -71,8 +71,12 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
         if (!token || !isMember) return;
 
         const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-        const wsProtocol = apiBase.startsWith('https') ? 'wss' : 'ws';
-        const wsUrl = `${wsProtocol}://${apiBase.replace(/^https?:\/\//, '')}/rooms/${roomId}/ws/ws?token=${token}`.replace('/ws/ws', '/ws'); // Fix double ws if base has it? No, standard is host/rooms/id/ws
+        const isSecure = apiBase.startsWith('https');
+        const wsProtocol = isSecure ? 'wss' : 'ws';
+        // Remove protocol (http:// or https://) to get host
+        const host = apiBase.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+        const wsUrl = `${wsProtocol}://${host}/rooms/${roomId}/ws?token=${token}`;
 
         const socket = new WebSocket(wsUrl);
         socketRef.current = socket;
