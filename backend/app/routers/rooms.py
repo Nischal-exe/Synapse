@@ -149,3 +149,94 @@ def delete_room(
     db.delete(room)
     db.commit()
     return None
+
+from fastapi import WebSocket, WebSocketDisconnect
+from ..websockets import manager
+import json
+
+@router.websocket("/{room_id}/ws")
+async def websocket_endpoint(
+    websocket: WebSocket, 
+    room_id: int, 
+    token: str,
+    db: Session = Depends(get_db)
+):
+    # Authenticate User
+    print(f"WS: Attempting connection for room {room_id}")
+    try:
+        user = auth_utils.get_user_from_token(token, db)
+        if not user:
+             print("WS: Authentication failed - User not found or token invalid")
+             await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+             return
+        print(f"WS: Authenticated user: {user.username}")
+    except Exception as e:
+        print(f"WS: Auth Exception: {e}")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    # Check Membership
+    is_member = db.query(models.RoomMember).filter(
+        models.RoomMember.user_id == user.id,
+        models.RoomMember.room_id == room_id
+    ).first()
+    
+    if not is_member:
+        print(f"WS: User {user.username} is not a member of room {room_id}")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Not a member")
+        return
+
+    print("WS: Connection accepted, connecting to manager...")
+    await manager.connect(websocket, room_id)
+    print("WS: Connected!")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Expecting data to be just message content string or JSON?
+            # Let's assume sending just the content string for simplicity or parse JSON if complex
+            # If client sends JSON like {content: "hi"}, parse it.
+            
+            content = data
+            try:
+                msg_data = json.loads(data)
+                if 'content' in msg_data:
+                    content = msg_data['content']
+            except:
+                pass # Treat as raw string
+            
+            if not content.strip():
+                continue
+
+            # Basic Persistence
+            # Note: Heavy DB ops in async loop can block. Ideally use `await run_in_threadpool`.
+            # For this scale, direct sync DB call is 'okay' but 'async db' is better.
+            # We'll do a quick sync save.
+            
+            new_msg = models.ChatMessage(
+                content=content,
+                room_id=room_id,
+                user_id=user.id
+            )
+            db.add(new_msg)
+            db.commit()
+            db.refresh(new_msg)
+            
+            # Construct response schema
+            response = {
+                "id": new_msg.id,
+                "content": new_msg.content,
+                "created_at": new_msg.created_at.isoformat(),
+                "user_id": user.id,
+                "owner": {
+                    "username": user.username,
+                    "id": user.id
+                }
+            }
+            
+            await manager.broadcast(response, room_id)
+            
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, room_id)
+    except Exception as e:
+        print(f"WS Error: {e}")
+        manager.disconnect(websocket, room_id)

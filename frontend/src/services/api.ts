@@ -3,7 +3,7 @@ import axios from 'axios';
 const envUrl = import.meta.env.VITE_API_BASE_URL;
 const apiBaseUrl = (envUrl && envUrl !== 'undefined' && envUrl !== '')
     ? envUrl
-    : 'https://synapse-backend-elo0.onrender.com';
+    : 'http://localhost:8000';
 
 const api = axios.create({
     baseURL: apiBaseUrl,
@@ -32,25 +32,40 @@ export const getMe = async () => {
     return response.data;
 };
 
+export const deleteUser = async () => {
+    const response = await api.delete('/users/me');
+    return response.data;
+};
+
 export const getRooms = async () => {
     const response = await api.get('/rooms/');
     return response.data;
 };
 
 // Post APIs
-export const getPosts = async (roomId?: number) => {
-    const params = roomId ? { room_id: roomId } : {};
+export const getPosts = async (roomId?: number, search?: string) => {
+    const params: any = {};
+    if (roomId) params.room_id = roomId;
+    if (search) params.search = search;
+
     const response = await api.get('/posts/', { params });
     return response.data;
 };
 
-export const createPost = async (postData: { title: string; content: string; room_id: number }) => {
+export const createPost = async (postData: { title: string; content: string; room_id: number; attachment_url?: string }) => {
     const response = await api.post('/posts/', postData);
     return response.data;
 };
 
 export const updatePost = async (postId: number, postData: { title?: string; content?: string }) => {
     const response = await api.put(`/posts/${postId}`, postData);
+    return response.data;
+};
+
+
+
+export const deletePost = async (postId: number) => {
+    const response = await api.delete(`/posts/${postId}`);
     return response.data;
 };
 
@@ -85,6 +100,16 @@ export const createComment = async (postId: number, content: string, parentId?: 
     return response.data;
 };
 
+export const updateComment = async (commentId: number, content: string) => {
+    const response = await api.put(`/posts/comments/${commentId}`, { content });
+    return response.data;
+};
+
+export const deleteComment = async (commentId: number) => {
+    const response = await api.delete(`/posts/comments/${commentId}`);
+    return response.data;
+};
+
 // Activity & Sidebar APIs
 export const getSidebarData = async () => {
     const response = await api.get('/users/me/sidebar');
@@ -105,6 +130,11 @@ export const getModeratorPosts = async () => {
 
 export const deletePostAsModerator = async (postId: number) => {
     const response = await api.delete(`/moderator/posts/${postId}`);
+    return response.data;
+};
+
+export const deleteUserByAdmin = async (userId: number) => {
+    const response = await api.delete(`/users/${userId}`);
     return response.data;
 };
 

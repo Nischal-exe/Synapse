@@ -49,12 +49,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
                             {isAuthenticated ? (
                                 <>
-                                    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
+                                    <Link to="/profile" className="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 rounded-full bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors duration-300">
                                         <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold font-sans">
                                             {user?.username?.[0].toUpperCase()}
                                         </div>
                                         <span className="text-xs font-bold text-foreground/70 uppercase tracking-widest font-sans">{user?.username}</span>
-                                    </div>
+                                    </Link>
                                     <button
                                         onClick={handleLogout}
                                         className="p-3 rounded-full text-foreground/40 hover:text-destructive hover:bg-destructive/5 transition-all duration-300"

@@ -25,15 +25,13 @@ from . import database, schemas, models
 # Supabase provides the bearer token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    
+def get_user_from_token(token: str, db: Session) -> Optional[models.User]:
+    """
+    Validates token and returns user, creating if necessary (Supabase sync).
+    Returns None if validation fails.
+    """
     if not token:
-        raise credentials_exception
+        return None
 
     try:
         # Verify Supabase Token
@@ -43,11 +41,10 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         user_metadata = payload.get("user_metadata", {})
         
         if supabase_uid is None:
-            raise credentials_exception
+            return None
             
-    except JWTError as e:
-        print(f"JWT Verification Failed: {e}")
-        raise credentials_exception
+    except JWTError:
+        return None
 
     # Check if user exists in our DB
     user = db.query(models.User).filter(models.User.supabase_id == supabase_uid).first()
@@ -69,7 +66,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             # Create New User (Just-in-Time Provisioning)
             username = user_metadata.get("username")
             if not username:
-                username = email.split("@")[0]
+                username = email.split("@")[0] if email else f"user{str(datetime.utcnow().timestamp())}"
                 
             full_name = user_metadata.get("full_name")
             date_of_birth = user_metadata.get("date_of_birth")
@@ -100,7 +97,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
                     db.refresh(new_user)
                     user = new_user
                     break # Success
-                except Exception as exc:
+                except Exception:
                     db.rollback()
                     existing_user = db.query(models.User).filter(models.User.email == email).first()
                     if existing_user:
@@ -108,16 +105,23 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
                         break
                     
                     if attempt < 2:
-                        base_name = user_metadata.get("username", email.split("@")[0])
+                        base_name = user_metadata.get("username") or (email.split("@")[0] if email else "user")
                         username = f"{base_name}{random.randint(1000, 9999)}"
                         continue
                     
-                    print(f"Auto-provisioning failed after retries: {exc}")
-                    raise HTTPException(status_code=400, detail="User creation failed (likely duplicate username).")
+                    return None # Failed provisioning
 
-    if user is None:
-        raise HTTPException(status_code=401, detail="User profile could not be loaded.")
-        
+    return user
+
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    user = get_user_from_token(token, db)
+    if not user:
+        raise credentials_exception
     return user
 
 def get_supabase_identity(token: str = Depends(oauth2_scheme)):

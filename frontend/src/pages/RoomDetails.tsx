@@ -5,7 +5,7 @@ import LoadingDots from '../components/LoadingDots';
 import PostItem from '../components/PostItem';
 import RoomChat from '../components/RoomChat';
 import { getPosts, getRooms, createPost, getSidebarData, joinRoom } from '../services/api';
-import { ArrowLeft, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Search, Link as LinkIcon } from 'lucide-react';
 import Header from '../components/Header';
 
 
@@ -37,7 +37,12 @@ export default function RoomDetails() {
     const [isChatOpen, setIsChatOpen] = useState(false); // For mobile chat toggle
     const [newPostTitle, setNewPostTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState('');
+    const [newAttachmentUrl, setNewAttachmentUrl] = useState('');
     const [isMember, setIsMember] = useState(false);
+
+    // Search State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
 
     const checkMembership = async () => {
         try {
@@ -67,10 +72,12 @@ export default function RoomDetails() {
             await createPost({
                 title: newPostTitle,
                 content: newPostContent,
+                attachment_url: newAttachmentUrl.trim() || undefined,
                 room_id: Number(roomId)
             });
             setNewPostTitle('');
             setNewPostContent('');
+            setNewAttachmentUrl('');
             // Refresh posts
             const postsData = await getPosts(Number(roomId));
             setPosts(postsData);
@@ -79,22 +86,40 @@ export default function RoomDetails() {
         }
     };
 
+    const handlePostDeleted = (postId: number) => {
+        setPosts(posts.filter(p => p.id !== postId));
+    };
+
+    const handlePostUpdated = (postId: number, updatedPost: Post) => {
+        setPosts(posts.map(p => p.id === postId ? { ...p, ...updatedPost } : p));
+    };
+
+    // Debounce Search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
     useEffect(() => {
         const fetchData = async () => {
             if (!roomId) return;
-            setLoading(true);
+            // Only show full page loader on initial room load, not search
+            if (!room) setLoading(true);
+
             try {
-                // Fetch posts for the room
-                const postsData = await getPosts(Number(roomId));
+                // Fetch posts for the room with search
+                const postsData = await getPosts(Number(roomId), debouncedSearch);
                 setPosts(postsData);
 
-                // Fetch room details
-                const roomsData = await getRooms();
-                const foundRoom = roomsData.find((r: Room) => r.id === Number(roomId));
-                setRoom(foundRoom || null);
-
-                // Check membership
-                await checkMembership();
+                // Fetch room details (only if not loaded)
+                if (!room) {
+                    const roomsData = await getRooms();
+                    const foundRoom = roomsData.find((r: Room) => r.id === Number(roomId));
+                    setRoom(foundRoom || null);
+                    await checkMembership();
+                }
 
             } catch (error) {
                 console.error("Error fetching room details:", error);
@@ -104,7 +129,7 @@ export default function RoomDetails() {
         };
 
         fetchData();
-    }, [roomId]);
+    }, [roomId, debouncedSearch]);
 
     if (loading) {
         return (
@@ -153,6 +178,20 @@ export default function RoomDetails() {
                             </div>
                         </div>
 
+                        {/* Search Bar */}
+                        <div className="flex-1 max-w-md mx-6 hidden md:block">
+                            <div className="relative group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 group-focus-within:text-primary transition-colors" />
+                                <input
+                                    type="text"
+                                    placeholder="Search discussions..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-primary/5 border border-primary/5 rounded-full pl-12 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-sans"
+                                />
+                            </div>
+                        </div>
+
                         <div className="flex items-center gap-4">
                             {!isMember && (
                                 <button
@@ -198,6 +237,19 @@ export default function RoomDetails() {
                                         onChange={(e) => setNewPostContent(e.target.value)}
                                         required
                                     />
+
+                                    {/* Attachment Input */}
+                                    <div className="relative">
+                                        <LinkIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+                                        <input
+                                            type="url"
+                                            placeholder="Attach a link (PDF, Image, Resource)..."
+                                            value={newAttachmentUrl}
+                                            onChange={(e) => setNewAttachmentUrl(e.target.value)}
+                                            className="w-full bg-primary/5 border border-primary/5 rounded-full pl-14 pr-6 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans text-foreground/80 placeholder:text-foreground/30"
+                                        />
+                                    </div>
+
                                     <div className="flex justify-end">
                                         <button
                                             type="submit"
@@ -219,7 +271,7 @@ export default function RoomDetails() {
                             ) : (
                                 <div className="space-y-8 pb-12">
                                     {posts.map((post) => (
-                                        <PostItem key={post.id} post={post} />
+                                        <PostItem key={post.id} post={post} onDelete={handlePostDeleted} onUpdate={handlePostUpdated} />
                                     ))}
                                 </div>
                             )}

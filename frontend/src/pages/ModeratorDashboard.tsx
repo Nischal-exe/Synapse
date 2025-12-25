@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { getModeratorPosts, deletePostAsModerator } from '../services/api';
+import { getModeratorPosts, deletePostAsModerator, deleteUserByAdmin } from '../services/api';
 import Header from '../components/Header';
 import { Trash2, ShieldAlert, Clock, User as UserIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,6 +14,7 @@ interface Post {
         username: string;
         full_name: string;
     };
+    owner_id: number;
     room_id: number;
 }
 
@@ -51,6 +52,20 @@ export default function ModeratorDashboard() {
                 setPosts(posts.filter(p => p.id !== postId));
             } catch (err) {
                 alert("Failed to delete post");
+            }
+        }
+    };
+
+    const handleBanUser = async (userId: number, username: string) => {
+        if (window.confirm(`ARE YOU SURE you want to BAN user "${username}"? \n\nThis will DELETE the user account and ALL their content (posts, comments, etc) PERMANENTLY.`)) {
+            try {
+                await deleteUserByAdmin(userId);
+                // Remove posts from this user from the view
+                setPosts(posts.filter(p => p.owner_id !== userId));
+                alert(`User ${username} has been banned.`);
+            } catch (error) {
+                console.error("Failed to ban user", error);
+                alert("Failed to ban user. Check console.");
             }
         }
     };
@@ -103,9 +118,16 @@ export default function ModeratorDashboard() {
                                                 <Clock className="w-3 h-3" />
                                                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                                             </span>
-                                            <span className="flex items-center gap-1">
+                                            <span className="flex items-center gap-1 group/user">
                                                 <UserIcon className="w-3 h-3" />
                                                 @{post.owner.username}
+                                                <button
+                                                    onClick={() => handleBanUser(post.owner_id || 0, post.owner.username)}
+                                                    className="ml-2 px-2 py-0.5 text-[10px] bg-destructive/10 text-destructive rounded hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover/user:opacity-100"
+                                                    title="Ban User"
+                                                >
+                                                    BAN
+                                                </button>
                                             </span>
                                         </div>
                                         <h3 className="text-xl font-bold mb-2">{post.title}</h3>

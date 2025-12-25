@@ -23,15 +23,18 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
     const { user } = useAuth();
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [rateLimitTimer, setRateLimitTimer] = useState<number | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const hasInitialScrolled = useRef(false);
 
+    // WebSocket Reference
+    const socketRef = useRef<WebSocket | null>(null);
+
     // Reset initial scroll when room changes
     useEffect(() => {
         hasInitialScrolled.current = false;
+        setMessages([]); // Clear messages on room switch
     }, [roomId]);
 
     // Scroll to bottom
@@ -39,30 +42,75 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // Auto-scroll only on initial load
+    // Auto-scroll only on initial load or new messages (if near bottom)
     useEffect(() => {
         if (!hasInitialScrolled.current && messages.length > 0) {
             scrollToBottom();
             hasInitialScrolled.current = true;
+        } else if (messages.length > 0) {
+            // Optional: Smart auto-scroll if user is already at bottom
+            scrollToBottom();
         }
     }, [messages]);
 
-    // Poll for messages
+    // Initial Fetch (REST) + WebSocket Connection
     useEffect(() => {
-        const fetchMessages = async () => {
+        // 1. Fetch historical messages via REST
+        const fetchHistory = async () => {
             try {
                 const response = await api.get(`/rooms/${roomId}/messages`);
                 setMessages(response.data);
             } catch (err) {
-                console.error("Failed to fetch messages", err);
+                console.error("Failed to fetch history", err);
+            }
+        };
+        fetchHistory();
+
+        // 2. Connect WebSocket
+        const token = localStorage.getItem('token');
+        if (!token || !isMember) return;
+
+        const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+        const wsProtocol = apiBase.startsWith('https') ? 'wss' : 'ws';
+        const wsUrl = `${wsProtocol}://${apiBase.replace(/^https?:\/\//, '')}/rooms/${roomId}/ws/ws?token=${token}`.replace('/ws/ws', '/ws'); // Fix double ws if base has it? No, standard is host/rooms/id/ws
+
+        const socket = new WebSocket(wsUrl);
+        socketRef.current = socket;
+
+        socket.onopen = () => {
+            console.log("Connected to Chat WS");
+            setError(null);
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                // Check if message already exists (optimistic update handling)
+                setMessages(prev => {
+                    if (prev.some(m => m.id === data.id)) return prev;
+                    return [...prev, data];
+                });
+            } catch (e) {
+                console.error("WS Parse Error", e);
             }
         };
 
-        fetchMessages();
-        const interval = setInterval(fetchMessages, 3000); // Poll every 3 seconds
+        socket.onclose = (e) => {
+            console.log("Chat WS Closed", e.code, e.reason);
+            // Don't show error if it's just a normal close or if we are not a member anymore (handled by effect cleanup)
+            if (e.code === 1008) {
+                setError(e.reason || "Access Denied");
+            }
+        };
 
-        return () => clearInterval(interval);
-    }, [roomId]);
+        socket.onerror = (error) => {
+            console.error("WS Error", error);
+        };
+
+        return () => {
+            socket.close();
+        };
+    }, [roomId, isMember]);
 
     // Rate Limit Timer Countdowm
     useEffect(() => {
@@ -88,32 +136,16 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
         }
         if (!newMessage.trim() || rateLimitTimer !== null) return;
 
-        setLoading(true);
-        setError(null);
+        // Optimistic UI Update (optional, but makes it snappy)
+        // We'll wait for server echo for simplicity unless lag is high
 
-        try {
-            await api.post(`/rooms/${roomId}/messages`, {
-                content: newMessage,
-                room_id: roomId
-            });
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ content: newMessage }));
             setNewMessage('');
-            const response = await api.get(`/rooms/${roomId}/messages`);
-            setMessages(response.data);
+            // Rate limit locally
             setRateLimitTimer(1);
-            // Scroll to bottom after sending
-            setTimeout(scrollToBottom, 100);
-
-        } catch (err: any) {
-            if (err.response && err.response.status === 429) {
-                setError(err.response.data.detail || "Frequency limit exceeded");
-                setRateLimitTimer(1);
-            } else if (err.response && err.response.status === 403) {
-                setError("Please join this room first to send messages");
-            } else {
-                setError("Failed to send message");
-            }
-        } finally {
-            setLoading(false);
+        } else {
+            setError("Connection lost. Reconnecting...");
         }
     };
 
@@ -122,7 +154,7 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
             {/* Header */}
             <div className="p-6 border-b border-primary/5 bg-primary/[0.03] backdrop-blur-md">
                 <h3 className="text-sm font-bold text-foreground flex items-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary mr-3 animate-pulse"></span>
+                    <span className={`w-1.5 h-1.5 rounded-full mr-3 animate-pulse ${socketRef.current?.readyState === 1 ? 'bg-green-500' : 'bg-red-500'}`}></span>
                     Chat
                 </h3>
             </div>
@@ -183,11 +215,11 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder={!isMember ? "Join room to chat..." : (rateLimitTimer ? `Please wait ${rateLimitTimer}s...` : "Type a message...")}
                         className={`w-full bg-background/50 border border-primary/10 rounded-full pl-6 pr-14 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans ${rateLimitTimer || !isMember ? 'cursor-not-allowed opacity-50' : ''}`}
-                        disabled={rateLimitTimer !== null || loading || !isMember}
+                        disabled={rateLimitTimer !== null || !isMember}
                     />
                     <button
                         type="submit"
-                        disabled={!newMessage.trim() || rateLimitTimer !== null || loading}
+                        disabled={!newMessage.trim() || rateLimitTimer !== null}
                         className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full transition-all ${!newMessage.trim() || rateLimitTimer !== null
                             ? 'text-foreground/20'
                             : 'text-white bg-primary shadow-lg shadow-primary/20 hover:scale-105 active:scale-95'
@@ -204,7 +236,7 @@ export default function RoomChat({ roomId, isMember }: RoomChatProps) {
                         <div className="absolute -top-12 left-0 right-0 flex justify-center">
                             <div className="bg-background/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-primary/60 px-4 py-1.5 rounded-full border border-primary/10 flex items-center shadow-xl font-sans">
                                 <Clock className="w-2.5 h-2.5 mr-2" />
-                                Rhythm enforced: {rateLimitTimer}s
+                                Rhythm enforced: {rateLimitTimer} s
                             </div>
                         </div>
                     )}

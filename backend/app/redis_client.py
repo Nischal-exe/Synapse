@@ -55,7 +55,7 @@ if redis_url:
         redis_client.ping()
         print(f"Connected to Redis at {redis_url[:15]}...")
     except Exception as e:
-        print(f"Failed to connect to Redis: {e}. Falling back to MockRedis.")
+        print(f"Redis not reachable ({e}). Using MockRedis (In-Memory) for local development.")
         redis_client = MockRedis()
 else:
     print("WARNING: REDIS_URL not found. Using MockRedis (In-Memory)")

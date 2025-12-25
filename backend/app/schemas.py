@@ -44,6 +44,7 @@ class PostBase(BaseModel):
     title: str
     content: str
     room_id: int
+    attachment_url: Optional[str] = None
 
 class PostCreate(PostBase):
     pass
@@ -51,6 +52,7 @@ class PostCreate(PostBase):
 class PostUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+    attachment_url: Optional[str] = None
 
 class Post(PostBase):
     id: int
@@ -82,6 +84,9 @@ class CommentBase(BaseModel):
 
 class CommentCreate(CommentBase):
     pass
+
+class CommentUpdate(BaseModel):
+    content: str
 
 class Comment(CommentBase):
     id: int

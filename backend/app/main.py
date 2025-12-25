@@ -28,6 +28,14 @@ def run_migrations():
             with engine.begin() as migration_txn:
                  migration_txn.execute(text("ALTER TABLE users ADD COLUMN date_of_birth VARCHAR;"))
             print("date_of_birth Migration complete.")
+
+        try:
+            connection.execute(text("SELECT attachment_url FROM posts LIMIT 1"))
+        except ProgrammingError:
+            print("Migrating DB: Adding attachment_url column to posts table...")
+            with engine.begin() as migration_txn:
+                 migration_txn.execute(text("ALTER TABLE posts ADD COLUMN attachment_url VARCHAR;"))
+            print("attachment_url Migration complete.")
             
     # Seed Roles and Permissions (Idempotent Check)
     try:

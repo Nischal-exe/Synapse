@@ -10,6 +10,7 @@ interface User {
     full_name: string;
     supabase_id?: string;
     role?: string; // Add role
+    date_of_birth?: string;
 }
 
 interface AuthContextType {
