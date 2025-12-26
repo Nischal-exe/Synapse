@@ -163,22 +163,21 @@ export default function RoomDetails() {
                 <Sidebar key={isSidebarOpen ? 'open' : 'closed'} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
                 <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-                    {/* Background acccent */}
-                    <div className="absolute top-0 left-0 w-full h-96 bg-primary/5 pointer-events-none" />
+
 
                     {/* Room Toolbar */}
-                    <div className="border-b border-primary/5 bg-background/80 p-6 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl shrink-0">
-                        <div className="flex items-center space-x-6">
-                            <button onClick={() => navigate('/dashboard')} className="p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all">
-                                <ArrowLeft className="w-5 h-5" />
+                    <div className="border-b border-primary/5 bg-background/80 p-4 sm:p-6 flex items-center justify-between sticky top-0 z-30 backdrop-blur-xl shrink-0">
+                        <div className="flex items-center space-x-3 sm:space-x-6">
+                            <button onClick={() => navigate('/dashboard')} className="p-2 sm:p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all">
+                                <ArrowLeft className="w-4 h-4 sm:w-5 h-5" />
                             </button>
-                            <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">{room.name}</h1>
-                                <p className="text-[9px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[120px] xs:max-w-[200px] sm:max-w-none">{room.description}</p>
+                            <div className="min-w-0">
+                                <h1 className="text-lg sm:text-2xl font-bold text-foreground tracking-tight truncate max-w-[150px] xs:max-w-none">{room.name}</h1>
+                                <p className="text-[8px] sm:text-[10px] text-foreground/40 uppercase tracking-[0.2em] font-black font-sans mt-0.5 truncate max-w-[120px] xs:max-w-[180px] sm:max-w-none">{room.description}</p>
                             </div>
                         </div>
 
-                        {/* Search Bar */}
+                        {/* Search Bar - Hidden on small mobile, visible on tablet+ */}
                         <div className="flex-1 max-w-md mx-6 hidden md:block">
                             <div className="relative group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 group-focus-within:text-primary transition-colors" />
@@ -192,19 +191,19 @@ export default function RoomDetails() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4">
                             {!isMember && (
                                 <button
                                     onClick={handleJoin}
-                                    className="btn-primary px-6 py-2.5 text-[10px] uppercase tracking-[0.2em]"
+                                    className="btn-primary px-4 sm:px-6 py-2 sm:py-2.5 text-[8px] sm:text-[10px] uppercase tracking-[0.2em]"
                                 >
-                                    Join Room
+                                    Join
                                 </button>
                             )}
 
                             {/* Mobile Chat Toggle */}
                             <button
-                                className="lg:hidden p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all relative"
+                                className="lg:hidden p-2 sm:p-3 text-foreground/40 hover:text-primary hover:bg-primary/5 rounded-full transition-all relative"
                                 onClick={() => setIsChatOpen(!isChatOpen)}
                             >
                                 <MessageSquare className="w-5 h-5" />
@@ -214,51 +213,56 @@ export default function RoomDetails() {
 
                     <div className="flex-1 flex overflow-hidden">
                         {/* Posts Content */}
-                        <div className={`flex-1 overflow-y-auto p-4 sm:p-6 md:p-12 space-y-10 relative z-10 custom-scrollbar ${isChatOpen ? 'hidden lg:block' : 'block'}`}>
+                        <div className={`flex-1 overflow-y-auto p-4 sm:p-8 lg:p-12 space-y-8 lg:space-y-10 relative z-10 custom-scrollbar ${isChatOpen ? 'hidden lg:block' : 'block'}`}>
                             {/* Create Post Form */}
-                            <div className="glass-card bg-white/40 dark:bg-black/40 border-primary/10 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:border-primary/30 transition-all">
-                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-8 flex items-center">
-                                    <span className="w-2 h-2 rounded-full bg-primary mr-4 animate-pulse"></span>
-                                    Ask a question
-                                </h3>
-                                <form onSubmit={handleCreatePost} className="space-y-6">
-                                    <input
-                                        type="text"
-                                        placeholder="Headline for your question..."
-                                        className="w-full bg-primary/5 border border-primary/5 rounded-full px-6 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans text-sm"
-                                        value={newPostTitle}
-                                        onChange={(e) => setNewPostTitle(e.target.value)}
-                                        required
-                                    />
-                                    <textarea
-                                        placeholder="Detail your inquiry for the collective..."
-                                        className="w-full bg-primary/5 border border-primary/5 rounded-[2rem] px-6 py-5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all h-32 resize-none font-sans text-sm"
-                                        value={newPostContent}
-                                        onChange={(e) => setNewPostContent(e.target.value)}
-                                        required
-                                    />
-
-                                    {/* Attachment Input */}
-                                    <div className="relative">
-                                        <LinkIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/30" />
+                            <div className="relative group/form mb-8 sm:mb-12">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-primary/5 rounded-[2rem] sm:rounded-[2.5rem] blur opacity-25 group-hover/form:opacity-50 transition duration-1000 group-hover/form:duration-200"></div>
+                                <div className="relative glass-card bg-white/60 dark:bg-black/60 border-primary/20 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(255,87,34,0.08)] transition-all duration-500">
+                                    <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-6 sm:mb-10 flex items-center justify-center lg:justify-start">
+                                        <div className="w-8 h-8 sm:w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 sm:mr-4 border border-primary/20">
+                                            <span className="w-2 h-2 sm:w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+                                        </div>
+                                        Ask a question
+                                    </h3>
+                                    <form onSubmit={handleCreatePost} className="space-y-4 sm:space-y-6">
                                         <input
-                                            type="url"
-                                            placeholder="Attach a link (PDF, Image, Resource)..."
-                                            value={newAttachmentUrl}
-                                            onChange={(e) => setNewAttachmentUrl(e.target.value)}
-                                            className="w-full bg-primary/5 border border-primary/5 rounded-full pl-14 pr-6 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-sans text-foreground/80 placeholder:text-foreground/30"
+                                            type="text"
+                                            placeholder="Headline for your question..."
+                                            className="w-full bg-primary/[0.03] border border-primary/10 rounded-full px-6 sm:px-8 py-4 sm:py-5 text-foreground font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/40 transition-all font-sans text-sm sm:text-base"
+                                            value={newPostTitle}
+                                            onChange={(e) => setNewPostTitle(e.target.value)}
+                                            required
                                         />
-                                    </div>
+                                        <textarea
+                                            placeholder="Detail your inquiry for the collective..."
+                                            className="w-full bg-primary/[0.03] border border-primary/10 rounded-[1.5rem] sm:rounded-[2rem] px-6 sm:px-8 py-4 sm:py-6 text-foreground focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/40 transition-all h-32 sm:h-40 resize-none font-sans text-sm sm:text-base leading-relaxed"
+                                            value={newPostContent}
+                                            onChange={(e) => setNewPostContent(e.target.value)}
+                                            required
+                                        />
 
-                                    <div className="flex justify-end">
-                                        <button
-                                            type="submit"
-                                            className="btn-primary py-3 px-8 text-[10px] uppercase tracking-[0.2em]"
-                                        >
-                                            Post
-                                        </button>
-                                    </div>
-                                </form>
+                                        {/* Attachment Input */}
+                                        <div className="relative">
+                                            <LinkIcon className="absolute left-6 sm:left-8 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 h-5 text-primary/40" />
+                                            <input
+                                                type="url"
+                                                placeholder="Attach a link..."
+                                                value={newAttachmentUrl}
+                                                onChange={(e) => setNewAttachmentUrl(e.target.value)}
+                                                className="w-full bg-primary/[0.02] border border-primary/5 rounded-full pl-14 sm:pl-16 pr-6 sm:pr-8 py-3 sm:py-4 text-xs sm:text-sm focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all font-sans text-foreground/70 placeholder:text-foreground/20"
+                                            />
+                                        </div>
+
+                                        <div className="flex justify-end pt-2 sm:pt-4">
+                                            <button
+                                                type="submit"
+                                                className="bg-primary hover:bg-primary/90 text-white py-3 sm:py-4 px-8 sm:px-12 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transform hover:-translate-y-1 transition-all duration-300 active:scale-95"
+                                            >
+                                                Post
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
 
                             {posts.length === 0 ? (

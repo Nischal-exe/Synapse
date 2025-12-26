@@ -39,10 +39,10 @@ export default function Login() {
             <div className="max-w-md w-full glass-card p-12 relative z-10 animate-fade-in border-primary/20 bg-white/50 dark:bg-black/50">
                 <div className="text-center mb-12">
                     <Link to="/" className="inline-block mb-8 hover:scale-105 transition-transform duration-500">
-                        <img className="h-12 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
+                        <img className="h-24 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
                     </Link>
                     <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Welcome Back</h2>
-                    <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold">The collective awaits your presence.</p>
+                    <p className="text-foreground/50 font-sans text-sm font-medium tracking-wide">Enter your credentials to access your account.</p>
                 </div>
 
                 <form className="space-y-8" onSubmit={handleSubmit}>
@@ -102,8 +102,8 @@ export default function Login() {
                 </form>
 
                 <div className="text-center mt-12">
-                    <p className="text-foreground/40 font-sans text-[10px] uppercase tracking-widest font-bold">
-                        Not a member yet?{' '}
+                    <p className="text-foreground/40 font-sans text-sm font-medium">
+                        Don't have an account?{' '}
                         <Link to="/register" className="text-primary hover:underline underline-offset-8">
                             Register
                         </Link>

@@ -1,43 +1,43 @@
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
 import Lottie from 'lottie-react';
 
 // Asset Imports
 import concentrateImg from '../assets/concentrate.png';
 import syncImg from '../assets/sync.png';
-import resourceHubImg from '../assets/resource-hub.png';
 import peerImg from '../assets/peer.png';
-import easyImg from '../assets/easy.png';
 import bearDancing from '../assets/Cutebeardancing.json';
 
 export default function Home() {
     const { isAuthenticated } = useAuth();
 
     return (
-        <div className="min-h-screen bg-background transition-colors duration-500 overflow-x-hidden pt-20">
-            <Header />
-
+        <div className="min-h-screen bg-background transition-colors duration-500 overflow-x-hidden">
             {/* Background elements */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
                 <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[10%] right-[5%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[120px]" />
             </div>
 
+            {/* Header Section */}
+            <Header variant="default" className="sticky top-0 left-0 right-0" />
+
             {/* Hero Section */}
-            <section className="relative pt-24 pb-20 px-6 z-10 border-b border-primary/10">
-                <div className="max-w-7xl mx-auto text-center">
+            <section className="relative pt-12 pb-20 px-6 z-10 border-b border-primary/10">
+
+                <div className="max-w-7xl mx-auto text-center pt-12">
                     <div className="inline-block px-6 py-2 mb-8 rounded-full bg-primary/5 border border-primary/20 text-primary text-xs font-bold animate-fade-in tracking-[0.2em] uppercase">
                         Collab • Learn • Sync
                     </div>
                     <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-bold mb-10 tracking-tight animate-slide-up leading-[0.9] text-foreground">
-                        Crafting Future
+                        Less Noise.
                         <br />
-                        Together.
+                        More Focus.
                     </h1>
                     <p className="text-lg md:text-2xl text-foreground/70 mb-14 max-w-2xl mx-auto animate-slide-up [animation-delay:200ms] leading-relaxed px-4">
-                        Synapse is a minimalist space for collaborative learning.
-                        Zero distractions, just meaningful academic growth.
+                        Synapse is a minimalist space for collaborative learning—zero distractions, just meaningful academic growth.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-slide-up [animation-delay:400ms]">
                         {isAuthenticated ? (
@@ -54,19 +54,17 @@ export default function Home() {
             </section>
 
             {/* Image Features Section (Mimicking the reference) */}
-            <section className="relative py-32 px-6 z-10 bg-primary text-primary-foreground">
+            <section className="relative py-32 px-6 z-10 bg-primary/90 text-primary-foreground">
                 <div className="max-w-5xl mx-auto text-center">
                     <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-12 md:20 leading-tight px-4">
-                        Highlight quality, simplicity, <br className="hidden md:block" /> and artisan approach.
+                        Focused. Refined. Shared.
                     </h2>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 md:gap-16">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
                         {[
                             { name: 'Pure Focus', desc: 'Zero distractions for your deep work sessions.', img: concentrateImg },
                             { name: 'Live Sync', desc: 'Real-time collaboration across all your devices.', img: syncImg },
-                            { name: 'Resource Hub', desc: 'A central library for all your study materials.', img: resourceHubImg },
                             { name: 'Peer Support', desc: 'Learn from mentors and fellow students.', img: peerImg },
-                            { name: 'Easy Path', desc: 'Streamlined workflows for academic success.', img: easyImg }
                         ].map((item, i) => (
                             <div key={i} className="flex flex-col items-center space-y-6">
                                 <div className="w-20 h-20 rounded-full border-2 border-primary-foreground/30 flex items-center justify-center overflow-hidden bg-white/10 group hover:scale-110 transition-transform duration-500">
@@ -113,14 +111,7 @@ export default function Home() {
                 </div>
             </section>
 
-            <footer className="relative py-12 px-6 z-10 border-t border-primary/5">
-                <div className="max-w-7xl mx-auto text-center">
-                    <div className="w-full h-px bg-primary/50 mb-8" />
-                    <div className="text-[12px] uppercase tracking-widest text-foreground/30 font-sans">
-                        @2025 Synapse
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }

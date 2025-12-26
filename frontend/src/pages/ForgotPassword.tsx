@@ -45,10 +45,10 @@ export default function ForgotPassword() {
                             Back to Login
                         </Link>
                         <Link to="/" className="inline-block mb-8 hover:scale-105 transition-transform duration-500">
-                            <img className="h-12 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
+                            <img className="h-24 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
                         </Link>
                         <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Reset Password</h2>
-                        <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold px-4">Enter your email to reset your password.</p>
+                        <p className="text-foreground/50 font-sans text-sm font-medium tracking-wide px-4">Enter your email and we'll send you a reset link.</p>
                     </div>
 
                     {error && (

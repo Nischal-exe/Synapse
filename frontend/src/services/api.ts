@@ -37,8 +37,18 @@ export const deleteUser = async () => {
     return response.data;
 };
 
-export const getRooms = async () => {
-    const response = await api.get('/rooms/');
+export const getRooms = async (skip: number = 0, limit: number = 100) => {
+    const response = await api.get('/rooms/', { params: { skip, limit } });
+    return response.data;
+};
+
+export const createRoom = async (roomData: { name: string; description: string }) => {
+    const response = await api.post('/rooms/', roomData);
+    return response.data;
+};
+
+export const deleteRoom = async (roomId: number) => {
+    const response = await api.delete(`/rooms/${roomId}`);
     return response.data;
 };
 
@@ -122,9 +132,8 @@ export const joinRoom = async (roomId: number) => {
 };
 
 // Moderator APIs
-export const getModeratorPosts = async () => {
-    // Assuming backend endpoint is /posts/moderator/queue or similar, but checking requirement it says /moderator/posts
-    const response = await api.get('/moderator/posts');
+export const getModeratorPosts = async (skip: number = 0, limit: number = 50) => {
+    const response = await api.get('/moderator/posts', { params: { skip, limit } });
     return response.data;
 };
 
@@ -135,6 +144,11 @@ export const deletePostAsModerator = async (postId: number) => {
 
 export const deleteUserByAdmin = async (userId: number) => {
     const response = await api.delete(`/users/${userId}`);
+    return response.data;
+};
+
+export const deleteChatMessage = async (message_id: number) => {
+    const response = await api.delete(`/rooms/messages/${message_id}`);
     return response.data;
 };
 

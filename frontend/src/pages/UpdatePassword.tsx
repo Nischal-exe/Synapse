@@ -119,10 +119,10 @@ export default function UpdatePassword() {
                 <div className="relative z-10">
                     <div className="text-center mb-10">
                         <Link to="/" className="inline-block mb-8 hover:scale-105 transition-transform duration-500">
-                            <img className="h-12 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
+                            <img className="h-24 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
                         </Link>
                         <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Set New Password</h2>
-                        <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold">Secure your account entry.</p>
+                        <p className="text-foreground/50 font-sans text-sm font-medium tracking-wide">Enter a secure password for your account.</p>
                     </div>
 
                     {error && (

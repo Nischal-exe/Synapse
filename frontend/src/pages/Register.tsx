@@ -49,7 +49,7 @@ export default function Register() {
             <div className="max-w-xl w-full glass-card p-12 relative z-10 animate-fade-in border-primary/20 bg-white/50 dark:bg-black/50">
                 <div className="text-center mb-12">
                     <Link to="/" className="inline-block mb-8 hover:scale-105 transition-transform duration-500">
-                        <img className="h-12 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
+                        <img className="h-24 w-auto object-contain mx-auto" src={logo} alt="Synapse" />
                     </Link>
                     <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">Register</h2>
                     <p className="text-foreground/50 font-sans text-sm uppercase tracking-widest font-bold">Join thousands of learners.</p>
@@ -157,8 +157,8 @@ export default function Register() {
                 </form>
 
                 <div className="text-center mt-12">
-                    <p className="text-foreground/40 font-sans text-[10px] uppercase tracking-widest font-bold">
-                        Already part of the collective?{' '}
+                    <p className="text-foreground/40 font-sans text-sm font-medium">
+                        Already have an account?{' '}
                         <Link to="/login" className="text-primary hover:underline underline-offset-8">
                             Login
                         </Link>
