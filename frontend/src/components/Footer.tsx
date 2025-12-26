@@ -2,7 +2,7 @@ import { Instagram, Mail } from 'lucide-react';
 
 export default function Footer() {
     return (
-        <footer className="relative py-12 px-6 z-10 border-t border-primary/5 bg-background">
+        <footer className="relative py-16 px-6 z-10 border-t border-primary/10 bg-primary/[0.02]">
             <div className="max-w-7xl mx-auto flex flex-col md:grid md:grid-cols-3 items-center gap-8 text-center md:text-left">
 
                 {/* Left side: About & Instagram */}
@@ -49,7 +49,7 @@ export default function Footer() {
             </div>
 
             <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-primary/5 flex flex-col md:flex-row justify-center items-center gap-4">
-                <div className="text-[9px] uppercase tracking-[0.4em] text-foreground/20 font-sans font-black">
+                <div className="text-[10px] uppercase tracking-[0.4em] text-foreground/60 font-sans font-black">
                     @2025 Synapse
                 </div>
             </div>

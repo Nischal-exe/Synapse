@@ -63,12 +63,12 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden pt-20">
+        <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden pt-28">
             <Header onMenuClick={() => setIsSidebarOpen(true)} />
 
 
 
-            <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 relative z-10 flex flex-col lg:flex-row gap-8 lg:gap-12">
+            <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-2 relative z-10 flex flex-col lg:flex-row gap-6 lg:gap-8">
                 {/* Overlay for mobile sidebar */}
                 {isSidebarOpen && (
                     <div
@@ -86,17 +86,17 @@ export default function Dashboard() {
 
                 {/* Main Content */}
                 <main className="flex-1 min-w-0">
-                    <header className="mb-8 animate-fade-in text-center lg:text-left">
-                        <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
-                            <div className="p-2 bg-primary rounded-full shadow-lg shadow-primary/20">
-                                <Compass className="w-3.5 h-3.5 text-white" />
+                    <header className="mb-6 animate-fade-in text-left">
+                        <div className="flex items-center justify-start gap-2 mb-2">
+                            <div className="p-1 bg-primary rounded-full shadow-lg shadow-primary/20">
+                                <Compass className="w-2.5 h-2.5 text-white" />
                             </div>
-                            <span className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] font-sans">Discovery Hub</span>
+                            <span className="text-[8px] font-black text-foreground/40 uppercase tracking-[0.2em] font-sans">Discovery Hub</span>
                         </div>
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-4 px-4 lg:px-0">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight mb-2">
                             Select your path to grow.
                         </h1>
-                        <p className="text-sm sm:text-base text-foreground/60 max-w-xl mx-auto lg:mx-0 leading-relaxed px-6 lg:px-0">
+                        <p className="text-[11px] sm:text-xs text-foreground/50 max-w-md leading-relaxed">
                             Shared learning, shaped by purpose.
                         </p>
                     </header>
@@ -124,7 +124,7 @@ export default function Dashboard() {
                                     <div
                                         key={room.id}
                                         onClick={() => handleRoomClick(room.id)}
-                                        className="glass-card p-8 group transition-all duration-500 cursor-pointer flex flex-col justify-between relative overflow-hidden active:scale-[0.98] animate-slide-up rounded-[2rem] border-primary/10 hover:border-primary/30"
+                                        className="glass-card p-6 group transition-all duration-500 cursor-pointer flex flex-col justify-between relative overflow-hidden active:scale-[0.98] animate-slide-up rounded-[1.5rem] border-primary/10 hover:border-primary/30"
                                         style={{ animationDelay: `${idx * 100}ms` }}
                                     >
                                         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 group-hover:rotate-12 transition-all duration-700 pointer-events-none">
@@ -132,21 +132,21 @@ export default function Dashboard() {
                                         </div>
 
                                         <div className="relative z-10 flex flex-col h-full">
-                                            <div className="flex items-center justify-between mb-6">
-                                                <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                                                     {room.name}
                                                 </h3>
                                                 <button
                                                     onClick={(e) => handleJoinRoom(e, room.id)}
-                                                    className={`w-10 h-10 rounded-full transition-all duration-500 flex items-center justify-center ${room.is_joined ? 'bg-primary text-white shadow-lg' : 'bg-primary/5 text-primary hover:bg-primary hover:text-white border border-primary/10'}`}
+                                                    className={`w-9 h-9 rounded-full transition-all duration-500 flex items-center justify-center ${room.is_joined ? 'bg-primary text-white shadow-lg' : 'bg-primary/5 text-primary hover:bg-primary hover:text-white border border-primary/10'}`}
                                                 >
-                                                    {room.is_joined ? <CheckCircle className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
+                                                    {room.is_joined ? <CheckCircle className="w-3.5 h-3.5" /> : <PlusCircle className="w-3.5 h-3.5" />}
                                                 </button>
                                             </div>
-                                            <p className="text-foreground/50 text-xs font-sans leading-relaxed mb-8 line-clamp-3">
-                                                {room.description || "A space dedicated to the pursuit of excellence and shared knowledge within our scholarly collective."}
+                                            <p className="text-foreground/50 text-[11px] font-sans leading-relaxed mb-6 line-clamp-3">
+                                                {room.description}
                                             </p>
-                                            <div className="mt-auto flex items-center text-[9px] font-black tracking-[0.2em] uppercase text-primary font-sans">
+                                            <div className="mt-auto flex items-center text-[8px] font-black tracking-[0.2em] uppercase text-primary font-sans">
                                                 Enter Room <ArrowRight className="w-2.5 h-2.5 ml-2 group-hover:translate-x-2 transition-transform duration-500" />
                                             </div>
                                         </div>

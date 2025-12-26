@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import {
     getModeratorPosts,
@@ -45,7 +46,8 @@ interface Room {
 type TabType = 'posts' | 'rooms';
 
 export default function ModeratorDashboard() {
-    const { user, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+    const { user, isAuthenticated, loading: authLoading } = useAuth();
     const [currentTab, setCurrentTab] = useState<TabType>('posts');
 
     // Posts State
@@ -64,13 +66,15 @@ export default function ModeratorDashboard() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (authLoading) return;
+
         if (isAuthenticated && (user?.role === 'moderator' || user?.role === 'admin')) {
             loadTabData();
-        } else {
+        } else if (!authLoading) {
             setLoading(false);
-            setError("Unauthorized Access");
+            setError(null);
         }
-    }, [isAuthenticated, user, currentTab, postPage]);
+    }, [isAuthenticated, user, currentTab, postPage, authLoading]);
 
     const loadTabData = async () => {
         setLoading(true);
@@ -96,7 +100,7 @@ export default function ModeratorDashboard() {
         if (window.confirm("Delete this post permanently?")) {
             try {
                 await deletePostAsModerator(postId);
-                setPosts(posts.filter(p => p.id !== postId));
+                setPosts(posts.filter((p: Post) => p.id !== postId));
             } catch (err) {
                 alert("Failed to delete post.");
             }
@@ -107,7 +111,7 @@ export default function ModeratorDashboard() {
         if (window.confirm(`BAN user @${username}? This deletes their account and ALL content.`)) {
             try {
                 await deleteUserByAdmin(userId);
-                setPosts(posts.filter(p => p.owner_id !== userId));
+                setPosts(posts.filter((p: Post) => p.owner_id !== userId));
             } catch (err) {
                 alert("Failed to ban user.");
             }
@@ -118,7 +122,7 @@ export default function ModeratorDashboard() {
         if (window.confirm("Delete this room? All contents will be lost.")) {
             try {
                 await deleteRoom(roomId);
-                setRooms(rooms.filter(r => r.id !== roomId));
+                setRooms(rooms.filter((r: Room) => r.id !== roomId));
             } catch (err) {
                 alert("Failed to delete room.");
             }
@@ -138,22 +142,48 @@ export default function ModeratorDashboard() {
         }
     };
 
+    if (authLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+                <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+            </div>
+        );
+    }
+
     if (!isAuthenticated || (user?.role !== 'moderator' && user?.role !== 'admin')) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center">
-                <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
-                <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-                <p className="text-muted-foreground">You do not have permission to view the moderator dashboard.</p>
+            <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center pb-32">
+                <ShieldAlert className="w-12 h-12 text-destructive mb-6 opacity-40" />
+                <p className="text-foreground/40 text-[10px] uppercase font-black tracking-[0.3em] font-sans">Collective Clearance Required</p>
+                <div className="mt-8">
+                    <button onClick={() => navigate('/dashboard')} className="text-primary text-[9px] font-black uppercase tracking-widest hover:underline px-8 py-3 bg-primary/5 rounded-full border border-primary/10">Return to Hub</button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col pt-32">
             <Header />
 
-            <div className="flex-1 flex overflow-hidden">
-                {/* Sidebar */}
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                {/* Mobile Navigation */}
+                <div className="md:hidden flex items-center gap-2 p-4 bg-card/50 border-b border-primary/5">
+                    <button
+                        onClick={() => setCurrentTab('posts')}
+                        className={`flex-1 py-3 px-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === 'posts' ? 'bg-primary text-white shadow-lg' : 'text-foreground/40'}`}
+                    >
+                        Posts
+                    </button>
+                    <button
+                        onClick={() => setCurrentTab('rooms')}
+                        className={`flex-1 py-3 px-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${currentTab === 'rooms' ? 'bg-primary text-white shadow-lg' : 'text-foreground/40'}`}
+                    >
+                        Rooms
+                    </button>
+                </div>
+
+                {/* Sidebar - Desktop Only */}
                 <aside className="w-64 bg-card border-r border-primary/5 flex flex-col p-6 space-y-2 hidden md:flex">
                     <div className="flex items-center gap-3 mb-10 px-2">
                         <div className="p-2 bg-primary/10 rounded-lg">
@@ -181,12 +211,12 @@ export default function ModeratorDashboard() {
                 {/* Main Content Area */}
                 <main className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-10">
                     <div className="max-w-5xl mx-auto">
-                        <header className="mb-10">
-                            <h1 className="text-3xl font-black tracking-tight text-foreground uppercase tracking-widest sm:text-4xl">
-                                {currentTab === 'posts' && 'Moderation Queue'}
-                                {currentTab === 'rooms' && 'Collective Hubs'}
+                        <header className="mb-6 sm:mb-10">
+                            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground uppercase tracking-widest">
+                                {currentTab === 'posts' && 'Post Queue'}
+                                {currentTab === 'rooms' && 'Rooms'}
                             </h1>
-                            <p className="text-foreground/40 text-sm font-sans mt-2">
+                            <p className="text-foreground/40 text-[11px] sm:text-sm font-sans mt-2">
                                 {currentTab === 'posts' && 'Review and manage content across all collectives.'}
                                 {currentTab === 'rooms' && 'Create and curate discussion environments.'}
                             </p>
@@ -212,34 +242,36 @@ export default function ModeratorDashboard() {
                                     </div>
                                 ) : (
                                     <>
-                                        {posts.map(post => (
+                                        {posts.map((post: Post) => (
                                             <div key={post.id} className="relative group overflow-hidden">
                                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/10 to-primary/5 rounded-[2rem] blur opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none"></div>
-                                                <div className="relative glass-card bg-white/60 dark:bg-black/60 border-primary/10 rounded-[2rem] p-6 sm:p-8 hover:border-primary/20 shadow-sm transition-all duration-300">
-                                                    <div className="flex justify-between items-start gap-4 mb-4">
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-3 mb-3 text-[10px] font-black uppercase tracking-widest text-foreground/30 font-sans">
+                                                <div className="relative glass-card bg-white/60 dark:bg-black/60 border-primary/10 rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-8 hover:border-primary/20 shadow-sm transition-all duration-300">
+                                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex flex-wrap items-center gap-2 mb-4 text-[9px] font-black uppercase tracking-widest text-foreground/30 font-sans">
                                                                 <span className="px-2 py-0.5 bg-primary/5 text-primary rounded-md border border-primary/10">Room #{post.room_id}</span>
                                                                 <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
                                                                 <span className="flex items-center gap-1 text-foreground/60"><UserIcon className="w-3 h-3" /> @{post.owner.username}</span>
                                                             </div>
-                                                            <h3 className="text-xl font-bold text-foreground mb-2">{post.title}</h3>
-                                                            <p className="text-foreground/60 text-sm font-sans line-clamp-2 leading-relaxed">{post.content}</p>
+                                                            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 truncate">{post.title}</h3>
+                                                            <p className="text-foreground/60 text-[13px] font-sans line-clamp-3 leading-relaxed">{post.content}</p>
                                                         </div>
-                                                        <div className="flex gap-2">
+                                                        <div className="flex sm:flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-primary/5">
                                                             <button
                                                                 onClick={() => handleBanUser(post.owner_id, post.owner.username)}
-                                                                className="p-3 text-foreground/20 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
+                                                                className="flex-1 sm:p-3 p-2.5 text-foreground/20 hover:text-red-500 hover:bg-red-500/10 rounded-xl sm:rounded-full transition-all flex items-center justify-center gap-2"
                                                                 title="Ban User"
                                                             >
-                                                                <UserMinus className="w-5 h-5" />
+                                                                <UserMinus className="w-4 h-4 sm:w-5 h-5" />
+                                                                <span className="sm:hidden text-[9px] font-black uppercase tracking-widest">Ban</span>
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDeletePost(post.id)}
-                                                                className="p-3 text-foreground/20 hover:text-destructive hover:bg-destructive/10 rounded-full transition-all"
+                                                                className="flex-1 sm:p-3 p-2.5 text-foreground/20 hover:text-destructive hover:bg-destructive/10 rounded-xl sm:rounded-full transition-all flex items-center justify-center gap-2"
                                                                 title="Delete Post"
                                                             >
-                                                                <Trash2 className="w-5 h-5" />
+                                                                <Trash2 className="w-4 h-4 sm:w-5 h-5" />
+                                                                <span className="sm:hidden text-[9px] font-black uppercase tracking-widest">Delete</span>
                                                             </button>
                                                         </div>
                                                     </div>
@@ -251,7 +283,7 @@ export default function ModeratorDashboard() {
                                         <div className="flex items-center justify-center gap-4 pt-6">
                                             <button
                                                 disabled={postPage === 0}
-                                                onClick={() => setPostPage(p => p - 1)}
+                                                onClick={() => setPostPage((p: number) => p - 1)}
                                                 className="p-3 bg-card border border-primary/5 rounded-full text-foreground/40 hover:text-primary disabled:opacity-30 disabled:hover:text-foreground/40 transition-all font-sans"
                                             >
                                                 <ChevronLeft className="w-5 h-5" />
@@ -259,7 +291,7 @@ export default function ModeratorDashboard() {
                                             <span className="text-xs font-black uppercase tracking-widest font-sans text-foreground/60">Page {postPage + 1}</span>
                                             <button
                                                 disabled={posts.length < postLimit}
-                                                onClick={() => setPostPage(p => p + 1)}
+                                                onClick={() => setPostPage((p: number) => p + 1)}
                                                 className="p-3 bg-card border border-primary/5 rounded-full text-foreground/40 hover:text-primary disabled:opacity-30 disabled:hover:text-foreground/40 transition-all font-sans"
                                             >
                                                 <ChevronRight className="w-5 h-5" />
@@ -309,7 +341,7 @@ export default function ModeratorDashboard() {
                                 )}
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {rooms.map(room => (
+                                    {rooms.map((room: Room) => (
                                         <div key={room.id} className="glass-card bg-white/40 dark:bg-black/40 border border-primary/5 rounded-[1.8rem] p-6 hover:border-primary/20 transition-all duration-300 flex justify-between items-center group">
                                             <div>
                                                 <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">{room.name}</h4>

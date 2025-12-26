@@ -154,7 +154,7 @@ export default function RoomDetails() {
         <div className="min-h-screen bg-background text-foreground font-sans flex flex-col h-screen overflow-hidden">
             <Header onMenuClick={() => setIsSidebarOpen(true)} />
 
-            <div className="flex flex-1 overflow-hidden relative pt-20">
+            <div className="flex flex-1 overflow-hidden relative pt-32">
                 {/* Mobile sidebar overlay */}
                 {isSidebarOpen && (
                     <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
@@ -217,48 +217,48 @@ export default function RoomDetails() {
                             {/* Create Post Form */}
                             <div className="relative group/form mb-8 sm:mb-12">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-primary/5 rounded-[2rem] sm:rounded-[2.5rem] blur opacity-25 group-hover/form:opacity-50 transition duration-1000 group-hover/form:duration-200"></div>
-                                <div className="relative glass-card bg-white/60 dark:bg-black/60 border-primary/20 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(255,87,34,0.08)] transition-all duration-500">
-                                    <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-6 sm:mb-10 flex items-center justify-center lg:justify-start">
-                                        <div className="w-8 h-8 sm:w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3 sm:mr-4 border border-primary/20">
-                                            <span className="w-2 h-2 sm:w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
-                                        </div>
-                                        Ask a question
-                                    </h3>
-                                    <form onSubmit={handleCreatePost} className="space-y-4 sm:space-y-6">
+                                <div className="relative glass-card bg-white/60 dark:bg-black/60 border-primary/20 rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(255,87,34,0.08)] transition-all duration-500">
+                                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                                        <h3 className="text-sm sm:text-lg font-bold text-foreground flex items-center">
+                                            <div className="w-6 h-6 sm:w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3 border border-primary/20">
+                                                <span className="w-1.5 h-1.5 sm:w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                                            </div>
+                                            Ask a question
+                                        </h3>
+                                    </div>
+                                    <form onSubmit={handleCreatePost} className="space-y-3 sm:space-y-4">
                                         <input
                                             type="text"
                                             placeholder="Headline for your question..."
-                                            className="w-full bg-primary/[0.03] border border-primary/10 rounded-full px-6 sm:px-8 py-4 sm:py-5 text-foreground font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/40 transition-all font-sans text-sm sm:text-base"
+                                            className="w-full bg-primary/[0.03] border border-primary/10 rounded-full px-5 sm:px-6 py-2.5 sm:py-3 text-foreground font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/40 transition-all font-sans text-xs sm:text-sm"
                                             value={newPostTitle}
                                             onChange={(e) => setNewPostTitle(e.target.value)}
                                             required
                                         />
                                         <textarea
-                                            placeholder="Detail your inquiry for the collective..."
-                                            className="w-full bg-primary/[0.03] border border-primary/10 rounded-[1.5rem] sm:rounded-[2rem] px-6 sm:px-8 py-4 sm:py-6 text-foreground focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/40 transition-all h-32 sm:h-40 resize-none font-sans text-sm sm:text-base leading-relaxed"
+                                            placeholder="Detail your inquiry..."
+                                            className="w-full bg-primary/[0.03] border border-primary/10 rounded-[1rem] sm:rounded-[1.5rem] px-5 sm:px-6 py-3 sm:py-4 text-foreground focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/40 transition-all h-20 sm:h-24 resize-none font-sans text-xs sm:text-sm leading-relaxed"
                                             value={newPostContent}
                                             onChange={(e) => setNewPostContent(e.target.value)}
                                             required
                                         />
 
-                                        {/* Attachment Input */}
-                                        <div className="relative">
-                                            <LinkIcon className="absolute left-6 sm:left-8 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 h-5 text-primary/40" />
-                                            <input
-                                                type="url"
-                                                placeholder="Attach a link..."
-                                                value={newAttachmentUrl}
-                                                onChange={(e) => setNewAttachmentUrl(e.target.value)}
-                                                className="w-full bg-primary/[0.02] border border-primary/5 rounded-full pl-14 sm:pl-16 pr-6 sm:pr-8 py-3 sm:py-4 text-xs sm:text-sm focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all font-sans text-foreground/70 placeholder:text-foreground/20"
-                                            />
-                                        </div>
-
-                                        <div className="flex justify-end pt-2 sm:pt-4">
+                                        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between pt-1">
+                                            <div className="relative flex-1">
+                                                <LinkIcon className="absolute left-5 sm:left-6 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary/40" />
+                                                <input
+                                                    type="url"
+                                                    placeholder="Link (optional)..."
+                                                    value={newAttachmentUrl}
+                                                    onChange={(e) => setNewAttachmentUrl(e.target.value)}
+                                                    className="w-full bg-primary/[0.02] border border-primary/5 rounded-full pl-12 sm:pl-14 pr-4 py-2 sm:py-2.5 text-[10px] sm:text-xs focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all font-sans text-foreground/70 placeholder:text-foreground/20"
+                                                />
+                                            </div>
                                             <button
                                                 type="submit"
-                                                className="bg-primary hover:bg-primary/90 text-white py-3 sm:py-4 px-8 sm:px-12 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transform hover:-translate-y-1 transition-all duration-300 active:scale-95"
+                                                className="bg-primary hover:bg-primary/90 text-white py-2.5 sm:py-3 px-6 sm:px-8 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-300 active:scale-95 shrink-0"
                                             >
-                                                Post
+                                                BroadCast
                                             </button>
                                         </div>
                                     </form>

@@ -32,7 +32,7 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden pt-20">
+        <div className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden pt-32">
             <Header />
 
             {/* Background elements */}
